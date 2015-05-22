@@ -5,7 +5,7 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
   
   # Find maximum time
   if (maxtime==0){
-    tmax <- max(tracks[,5])
+    tmax <- max(tracks[,6])
   } else { tmax <- maxtime }
   
   # Make output time interval list
@@ -33,7 +33,9 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
     
     # Compare!
     # We want data for the same particle ID but separated by dt
-    w <- which((abs(shiftedtracks[,5]-tracks[,5])==dt)&(shiftedtracks[,6]==tracks[,6]))
+    tmp <- tracks[,6]
+    w <- which((shiftedtracks[,7]==tracks[,7]))
+    #w <- which((abs(shiftedtracks[,6]-tracks[,6])==dt)&(shiftedtracks[,7]==tracks[,7]))
     
     # x and y displacements
     dx <- shiftedtracks[w,1] - tracks[w,1]
@@ -44,7 +46,8 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
       drifty <- mean(dy)
       dx2 <- (dx - driftx)^2
       dy2 <- (dy - drifty)^2
-    } else{
+    } 
+    else{
       dx2 <- dx^2
       dy2 <- dy^2
     }

@@ -57,9 +57,9 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
   for (i in 0:(images-1)){
     # Build the filepath and name for this image
     cat("Reading image ",i,"\n")
-    thisimagename <- paste(filename,formatC(i,flag="0",digits=4),".tif",sep="")
+    thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".tif",sep="")
     #cat(thisimagename,"\n")
-    thisimage <- channel(readImage(thisimagename),channel=chan)
+    thisimage <- channel(readImage(thisimagename), chan)
     
     # Rotate this image if you so desire
     if (rotang!=0){
