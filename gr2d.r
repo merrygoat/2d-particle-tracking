@@ -31,14 +31,14 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE){
   
   # Need to sort density for binary case
   if(binary==FALSE){
-    density <- nrow(data)/((imgsize[1]*imgsize[2])*nframes)
+    density <- nrow(data)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
   } else{
     w <- which(data[,6]==1)
-    densitysmall <- length(w)/((imgsize[1]*imgsize[2])*nframes)
+    densitysmall <- length(w)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
     w <- which(data[,6]==0)
-    densitybig <- length(w)/((imgsize[1]*imgsize[2])*nframes)
+    densitybig <- length(w)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
     
-    density <- nrow(data)/((imgsize[1]*imgsize[2])*nframes)
+    density <- nrow(data)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
   }
   
   #cat("Frames :",nframes,"\n")
@@ -155,21 +155,21 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE){
         thetaymax <- 0
                 
         # Is particle j within distance binend of the edge of the image?
-        if (thisframe[j,1] < binend){ 
+        if (thisframe[j,1] - imgsize[1] < binend){ 
           #edgexmin <- TRUE 
-          thetaxmin <- 2*acos(thisframe[j,1] / binend)
+          thetaxmin <- 2*acos((thisframe[j,1] - imgsize[1]) / binend)
         }
-        if (thisframe[j,2] < binend){
+        if (thisframe[j,2] - imgsize[2] < binend){
           #edgeymin <- TRUE 
-          thetaymin <- 2*acos(thisframe[j,2] / binend)
+          thetaymin <- 2*acos((thisframe[j,2] - imgsize[2]) / binend)
         }
-        if ((imgsize[1] - thisframe[j,1]) < binend){ 
+        if ((imgsize[3] - thisframe[j,1]) < binend){ 
           #edgexmax <- TRUE 
-          thetaxmax <- 2*acos((imgsize[1] - thisframe[j,1]) / binend)
+          thetaxmax <- 2*acos((imgsize[3] - thisframe[j,1]) / binend)
         }
-        if ((imgsize[2] - thisframe[j,2]) < binend){ 
+        if ((imgsize[4] - thisframe[j,2]) < binend){ 
           #edgeymax <- TRUE 
-          thetaymax <- 2*acos((imgsize[2] - thisframe[j,2]) / binend)
+          thetaymax <- 2*acos((imgsize[4] - thisframe[j,2]) / binend)
         }
         
         # Now consider double counted angles for if more than 1 edge is crossed
