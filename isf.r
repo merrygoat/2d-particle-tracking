@@ -21,12 +21,18 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
   output <- matrix(nrow=ntimes,ncol=5)
   output[,1] <- dts
   
+  cat("Progress of isf\n")
+  objprogress <- txtProgressBar(min=0, max=ntimes, style=3)
+  
   # Loop over time intervals
   for (i in 1:ntimes){
+    
+    setTxtProgressBar(objprogress, i)  
+    
     # We are considering time interval dt on this loop iteration
     dt <- output[i,1]
     
-    cat("Time interval :",dt,"\n")
+    #cat("Time interval :",dt,"\n")
     
     # Create shifted array
     shiftedtracks <- shift(tracks,dt)
@@ -63,6 +69,8 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
     output[i,5] <- length(w)
     
   }
+  
+  close(objprogress)
   
   return(output)
   

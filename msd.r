@@ -8,8 +8,6 @@ msd = function(tracks,interval=1,maxtime=0,drift=FALSE){
     tmax <- max(tracks[,6])
   } else { tmax <- maxtime }
   
-  
-  
   # Make output time interval list
   ntimes <- floor(tmax/interval)
   maxdt <- ntimes*interval
@@ -23,12 +21,18 @@ msd = function(tracks,interval=1,maxtime=0,drift=FALSE){
   output <- matrix(nrow=ntimes,ncol=7)
   output[,1] <- dts
   
+  cat("Progress of msd\n")
+  objprogress <- txtProgressBar(min=0, max=ntimes, style=3)
+  
   # Loop over time intervals
   for (i in 1:ntimes){
+    
+    setTxtProgressBar(objprogress, i)  
+    
     # We are considering time interval dt on this loop iteration
     dt <- output[i,1]
     
-    cat("Time interval :",dt,"\n")
+    #cat("Time interval :",dt,"\n")
     
     # Create shifted array
     shiftedtracks <- shift(tracks,dt)

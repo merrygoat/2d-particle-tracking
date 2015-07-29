@@ -46,3 +46,5 @@ chi4 = function(data){
         distfromj[j] <- distfromj[j] + (sqrt((refframe[j,1] - childframe[k,1])^2+(refframe[j,2] - childframe[k,2])^2))    
       }
     }
+  }
+}

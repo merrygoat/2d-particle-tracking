@@ -6,11 +6,13 @@
 # Taking into account the finite nature of microscope image
 # Pretty slow right now
 
-gr2d = function(data,nbins,deltar,imgsize,binary=FALSE){
+gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,frames=-1){
   
   # We are working with multiple frames - how many?
   # Note first frame is labeled zero, so add 1
-  nframes <- max(data[,6]) + 1
+  if (frames==-1) {
+    nframes <- max(data[,6]) + 1
+  }
   
   # Output is 2 column matrix with r and g(r)
   # Or if binary is true we have 4 columns to hold bigbig, smallsmall and bigsmall
@@ -47,9 +49,15 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE){
   # i labels frames,
   # j labels particles,
   # k labels bins
+  
+  cat("Progress of g(r)\n")
+  objprogress <- txtProgressBar(min=0, max=nframes, style=3)
+  
   for (i in 1:nframes){
     
-    cat("Frame ",i,"\n")
+    setTxtProgressBar(objprogress, i)  
+    
+    #cat("Frame ",i,"\n")
     
     # Get data for this frame
     wframe <- which(data[,6]==(i-1))
@@ -216,6 +224,8 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE){
     plot(output[,1],output[,2],type="l")
     
   }
+  
+  close(objprogress)
   
   # Normalise by frames
   if (binary==FALSE){

@@ -71,7 +71,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
   
   # Number of particles found
   nparticles <- length(coords[,1])
-  cat('Initial particles: ',nparticles,'\n')
+  #cat('Initial particles: ',nparticles,'\n')
   
   # Low and high x and y for each particle centre
   xlo <- xcoords-range
@@ -129,7 +129,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
   
   # Number of particles found
   nparticles <- length(coords[,1])
-  cat('Particles after separation 1: ',nparticles,'\n')
+  #cat('Particles after separation 1: ',nparticles,'\n')
   
   # Low and high x and y for each particle centre
   xlo <- xcoords-range
@@ -162,7 +162,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
   coords[,2] <- ycoords
 
   # Number of particles remaining after masscut
-  cat('Particles after masscut: ',nparticles,'\n')
+  #cat('Particles after masscut: ',nparticles,'\n')
   
   # Separation is very slow for large numbers of particles 
   # Probably don't use this bit
@@ -213,7 +213,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
     coords[,2] <- ycoords
   
     # Number of particles remaining after separation resolution
-    cat('Particles after separation resolution: ',nparticles,'\n')
+    #cat('Particles after separation resolution: ',nparticles,'\n')
     
   }
     

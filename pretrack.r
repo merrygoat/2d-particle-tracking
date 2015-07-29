@@ -54,9 +54,15 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
   output <- matrix(nrow=1,ncol=6)
   #cat(output) #currently says NA NA NA NA NA
   
+  cat("Progress of particle identification\n")
+
+  objprogress <- txtProgressBar(min=0, max=images, style=3)
+  
   for (i in 0:(images-1)){
+    setTxtProgressBar(objprogress, i)  
+    
     # Build the filepath and name for this image
-    cat("Reading image ",i,"\n")
+    #cat("Reading image ",i,"\n")
     thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".tif",sep="")
     #cat(thisimagename,"\n")
     thisimage <- channel(readImage(thisimagename), chan)
@@ -89,6 +95,8 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
     output <- rbind(output,f)
     
   }
+  
+  close(objprogress)
   
   # How long is output?
   length <- nrow(output)
