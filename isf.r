@@ -61,7 +61,9 @@ isf = function(tracks,interval=1,length,maxtime=0,drift=FALSE){
     dr <- sqrt(dr2)
     cosdr <- cos((2*pi/length)*dr)
     sindr <- sin((2*pi/length)*dr)
-    modulus <- sqrt(sum(cosdr)^2 + sum(sindr)^2)/length(w)
+    modulus <-  sum(besselJ((2*pi/length)*dr,0))/length(w)
+  # Francesco -> Ian's version, suspected to be wrong:
+  # sqrt(sum(cosdr)^2 + sum(sindr)^2)/length(w)
     
     output[i,2] <- mean(cosdr)
     output[i,3] <- mean(sindr)
