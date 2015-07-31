@@ -9,11 +9,11 @@ trackroutine = function(){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-07-10/0.52_ii/images/FITC_0.52_ii"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-07-10/0.52_ii/"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-07-27/0.52-vii/images/FITC-0.52-vii"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-07-27/0.52-vii/"
   
   #Pretrack variables
-  varimages <- 100        #How many image to read from varfilename
+  varimages <- 50        #How many image to read from varfilename
   vardiameter <-19        #Particle diamter - used in particle identification
   varfilter <-11          #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
@@ -21,14 +21,14 @@ trackroutine = function(){
   varminimum <- 0.1       #Lowest pixel value for center of particle
   
   #Track variables
-  varimgx <- 256          #Width of the image in pixels
-  varimgy <- 256          #Height of the image in pixels
+  varimgx <- 451          #Width of the image in pixels
+  varimgy <- 457          #Height of the image in pixels
   varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 8         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
   varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 1         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vartimestep = 0.5     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 20      #How many frames of data to analyse for the g(r)
   
   ### Main ###
@@ -72,7 +72,7 @@ trackroutine = function(){
   #Do g(r) and write it out
   gr <- gr2d(tr,nbins=200,deltar=0.5,imgsize=c(varedgecutoff,varedgecutoff,varimgx-varedgecutoff,varimgy-varedgecutoff), nframes=vargofrframes)
   gr <- cbind(gr[,1], gr[,1]/varparticlesize, gr[,2]) # multiply the first column by vartimestep to give time in seconds
-  gr <- rbind(c("Frames", "Time", "g(r)"), gr)
+  gr <- rbind(c("Distance (Diameters)", "Distance (Pixels)", "g(r)"), gr)
   write(t(gr),file=paste(vardirname, "gr.txt"),ncolumns=3,sep="\t")
   
 }
