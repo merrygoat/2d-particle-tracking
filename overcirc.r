@@ -14,6 +14,6 @@ overcirc = function(img,coords,rad=2){
   
   display(img,method="raster")
   
-  #return(img)
+  return(img)
   
 }

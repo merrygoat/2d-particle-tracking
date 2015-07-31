@@ -66,6 +66,8 @@ msd = function(tracks,interval=1,maxtime=0,drift=FALSE){
     
   }
   
+  close(objprogress)
+  
   return(output)
   
 }

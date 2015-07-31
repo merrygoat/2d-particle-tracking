@@ -6,11 +6,11 @@
 # Taking into account the finite nature of microscope image
 # Pretty slow right now
 
-gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,frames=-1){
+gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,nframes=-1){
   
   # We are working with multiple frames - how many?
   # Note first frame is labeled zero, so add 1
-  if (frames==-1) {
+  if (nframes==-1) {
     nframes <- max(data[,6]) + 1
   }
   

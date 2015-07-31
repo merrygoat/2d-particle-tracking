@@ -52,11 +52,15 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
   # convert logical to numeric
   circmask <- circmask*1
   
+  cat("Progress of tracking\n")
+  objprogress <- txtProgressBar(min=0, max=tmax, style=3)
+  
   # I guess we'll have to loop over frames at some point
   # Start in second frame and compare it to the first
   for (i in 1:tmax){
     
     #cat("Tracking frame: ",i,"\n")
+    setTxtProgressBar(objprogress, tmax)  
     
     # Get this frame co-ordinates
     wnow <- which(pretrack[,6] == i)
@@ -288,7 +292,7 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
     
     #cat(nunq," ",nrow(nowident),"\n")
     if (nunq==nowparticles){
-      cat("Frame ",i,": Uniquely identified all particles.\n")
+      #cat("Frame ",i,": Uniquely identified all particles.\n")
     } else{
       cat("Frame ",i,": Non-unique particles IDs. Problems!\n")
     }
@@ -298,6 +302,8 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
     output <- rbind(output,nowout)
       
   }
+  
+  close(objprogress)
   
   cat("Unique trajectories: ",length(unique(output[,7])),"\n")
   
@@ -312,7 +318,6 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
     output[,7]<-as.numeric(factor(output[,7], levels = unique(output[,7])))
     cat("Sufficiently long trajectories: ",length(unique(output[,7])),"\n")
   }
-  
   
   return(output)
   
