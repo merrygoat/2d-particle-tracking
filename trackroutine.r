@@ -9,11 +9,12 @@ trackroutine = function(){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-07-27/0.52-vii/images/FITC-0.52-vii"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-07-27/0.52-vii/"
+  istiffstack <- TRUE     #Set to true if the images are read in as a single compound tiff image
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos6/FITC-0.52-pos6"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos6/"
   
   #Pretrack variables
-  varimages <- 50        #How many image to read from varfilename
+  varimages <- 200        #How many image to read from varfilename
   vardiameter <-19        #Particle diamter - used in particle identification
   varfilter <-11          #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
@@ -21,19 +22,19 @@ trackroutine = function(){
   varminimum <- 0.1       #Lowest pixel value for center of particle
   
   #Track variables
-  varimgx <- 451          #Width of the image in pixels
-  varimgy <- 457          #Height of the image in pixels
+  varimgx <- 500          #Width of the image in pixels
+  varimgy <- 493          #Height of the image in pixels
   varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 8         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
   varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 0.5     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vartimestep = 1     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 20      #How many frames of data to analyse for the g(r)
   
   ### Main ###
   
-  pt <- pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey")
+  pt <- pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey", tiffstack = istiffstack)
   ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
   
   #Print out some sample overcircled images so the user can check the tracking is OK.  
