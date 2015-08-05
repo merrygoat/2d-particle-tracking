@@ -10,8 +10,8 @@ trackroutine = function(){
   
   #File directory variables
   istiffstack <- TRUE     #Set to true if the images are read in as a single compound tiff image
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos10/FITC-0.52-pos10"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos10/"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos1/FITC-0.52-pos1"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos1/"
   
   #Pretrack variables
   varimages <- 200        #How many image to read from varfilename
@@ -27,7 +27,7 @@ trackroutine = function(){
   
   #Other variables that I can't think of a title for
   varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 1     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vartimestep = 0.261     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 20      #How many frames of data to analyse for the g(r)
   
   ### Main ###
@@ -40,8 +40,8 @@ trackroutine = function(){
     imgtiffstack <- paste(varfilename,"000.tif",sep="") #If no tiff stack, read in one image anyway to get the dimensions.
   }
   
-  varimgx <- dim(imgtiffstack[1])          #Width of the image in pixels
-  varimgy <- dim(imgtiffstack[2])          #Height of the image in pixels
+  varimgx <- dim(imgtiffstack)[1]          #Width of the image in pixels
+  varimgy <- dim(imgtiffstack)[2]          #Height of the image in pixels
   
   pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey", istiffstack = istiffstack, imgtiffstack = imgtiffstack)
   ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
