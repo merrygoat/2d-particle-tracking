@@ -33,7 +33,7 @@
 #
 # Note: Eccentricity is not computed because of laziness and the fact that I rarely use it for anything
 
-pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diameter,separation=0,masscut,minimum,chan="grey",tiffstack=FALSE){
+pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diameter,separation=0,masscut,minimum,chan="grey",istiffstack=FALSE, imgtiffstack){
   
   # In contrast with old IDL code, I will read in and handle each image separately in order
   # rather than reading in whole sequence prior to processing
@@ -54,11 +54,6 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
   output <- matrix(nrow=1,ncol=6)
   #cat(output) #currently says NA NA NA NA NA
     
-  if (tiffstack == TRUE) {
-    cat("Reading image from file.\n")
-    imgtiffstack = channel(readImage(paste(filename,".tif",sep="")), chan)
-  }
-  
   cat("Progress of particle identification\n")
 
   objprogress <- txtProgressBar(min=0, max=images, style=3)
@@ -66,7 +61,7 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
   for (i in 0:(images-1)){
     setTxtProgressBar(objprogress, i)  
     
-    if (tiffstack==FALSE) {
+    if (istiffstack==FALSE) {
     # Build the filepath and name for this image
     #cat("Reading image ",i,"\n")
     thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".tif",sep="")
