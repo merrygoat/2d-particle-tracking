@@ -5,7 +5,7 @@
 # Ian Williams
 # 22/09/2013
 
-feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecccut){
+feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecccut=1,verbose=0){
   
   # Require odd diameter
   if ((diameter %% 2)==0){
@@ -71,8 +71,10 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   
   # Number of particles found
   nparticles <- length(coords[,1])
-  #cat('Initial particles: ',nparticles,'\n')
-  
+  if (verbose==1){
+  cat('Initial particles: ',nparticles,'\n')
+  }
+
   # Low and high x and y for each particle centre
   xlo <- xcoords-range
   xhi <- xcoords+range
@@ -129,8 +131,10 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   
   # Number of particles found
   nparticles <- length(coords[,1])
-  #cat('Particles after separation 1: ',nparticles,'\n')
-  
+    if (verbose==1){
+  cat('Particles after separation 1: ',nparticles,'\n')
+  }
+
   # Low and high x and y for each particle centre
   xlo <- xcoords-range
   xhi <- xcoords+range
@@ -162,8 +166,10 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   coords[,2] <- ycoords
 
   # Number of particles remaining after masscut
-  #cat('Particles after masscut: ',nparticles,'\n')
-  
+  if (verbose==1){
+  cat('Particles after masscut: ',nparticles,'\n')
+  }
+
   # Separation is very slow for large numbers of particles 
   # Probably don't use this bit
   if (separation != 0){
@@ -213,8 +219,9 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
     coords[,2] <- ycoords
   
     # Number of particles remaining after separation resolution
-    #cat('Particles after separation resolution: ',nparticles,'\n')
-    
+    if (verbose==1){
+    cat('Particles after separation resolution: ',nparticles,'\n')
+    }    
   }
     
   # Centroiding for true centres
@@ -322,7 +329,9 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   w <- which(output[,5]<=ecccut)
   output <- output[w,]
    
+  if (verbose==1){
   cat('Particles after eccentricity cut: ',nrow(output),'\n')
+  }
 
   return(output)
   

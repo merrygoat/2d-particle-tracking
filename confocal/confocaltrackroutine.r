@@ -1,10 +1,12 @@
 #!/usr/bin/env Rscript
 
-trackroutine = function(){
+# Particle identification tracking and characterisation for 2D confocal images
+
+confocaltrackroutine = function(){
   
   # source all scripts in the current directory
   setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
-  filelist <- c("chi4.r", "feature.r", "gr2d.r", "iantrack.r", "isf.r", "lowpass.r", "msd.r", "pretrack.r", "shift.r", "overcirc.r")
+  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
