@@ -5,11 +5,30 @@
 # lobject must be odd integer
 # Also subtracts background and rescales brightnesses
 
-lowpass = function(image,lobject,bgavg=5,hpass=0,background="mean"){
+lowpass = function(image,lobject,bgavg=5,hpass=0,background="mean",setmax=1){
+  
+  # Subtract median i.e. background
+  if (background=="mean"){
+    image <- image - mean(image)
+  } else if(background=="median"){
+    image <- image-median(image)
+  }
+  
+  # Anything negative is set to zero
+  black <- which(image < 0)
+  image[black] <- 0
+  
+  # Now scale to full dynamic range 0 to 1
+  image <- image/max(image)
+  
+  image[image>1] <- 1
   
   # Lowpass filter
   lp <- makeBrush(lobject,shape="disc",step=FALSE)^2
   lp <- lp/sum(lp)
+  
+  #cat(dim(image),"\n")
+  #cat(dim(lp),"\n")
   
   l <- filter2(image,lp)
   
@@ -34,20 +53,13 @@ lowpass = function(image,lobject,bgavg=5,hpass=0,background="mean"){
   
   g <- l - b
   
-  # Subtract median i.e. background
-  if (background=="mean"){
-    g <- g - mean(g)
-  } else{
-    g <- g-median(g)
-  }
-      
-  # Anything negative is set to zero
-  black <- which(g<0,arr.ind=TRUE)
+  black <- which(g < 0)
   g[black] <- 0
   
-  # Now scale to full dynamic range 0 to 1
-  scale <- 1/max(g)
-  g <- g*scale
+  g <- g/(max(g)*setmax)
+  g[g>1] <- 1
+  
+  
   
   return(g)
   

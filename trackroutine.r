@@ -10,8 +10,8 @@ trackroutine = function(){
   
   #File directory variables
   istiffstack <- TRUE     #Set to true if the images are read in as a single compound tiff image
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos1/FITC-0.52-pos1"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos1/"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos7/FITC-0.52-pos7"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos7/"
   
   #Pretrack variables
   varimages <- 200        #How many image to read from varfilename
@@ -27,7 +27,7 @@ trackroutine = function(){
   
   #Other variables that I can't think of a title for
   varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 0.261     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vartimestep = 1         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 20      #How many frames of data to analyse for the g(r)
   
   ### Main ###

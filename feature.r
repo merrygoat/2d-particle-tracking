@@ -5,7 +5,7 @@
 # Ian Williams
 # 22/09/2013
 
-feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
+feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecccut){
   
   # Require odd diameter
   if ((diameter %% 2)==0){
@@ -318,6 +318,11 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE){
   
   # Return the output array with data in columns:
   # x, y, mass, r_g, eccentricity
+
+  w <- which(output[,5]<=ecccut)
+  output <- output[w,]
+   
+  cat('Particles after eccentricity cut: ',nrow(output),'\n')
 
   return(output)
   
