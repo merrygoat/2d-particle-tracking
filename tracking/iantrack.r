@@ -60,7 +60,7 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
   for (i in 1:tmax){
     
     #cat("Tracking frame: ",i,"\n")
-    setTxtProgressBar(objprogress, tmax)  
+    setTxtProgressBar(objprogress, i)  
     
     # Get this frame co-ordinates
     wnow <- which(pretrack[,6] == i)

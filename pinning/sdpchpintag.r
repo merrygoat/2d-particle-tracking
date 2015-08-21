@@ -12,9 +12,16 @@ sdpchpintag = function(input,chunkwidth,sdthresh){
   # output is: trsize + additional pin tag column
   output <- matrix(nrow=1,ncol=(ncol(input)+1))
   
+  cat("Progress of particle pin determination\n")
+  
+  objprogress <- txtProgressBar(min=0, max=nparticles-1, style=3)
+  
   for(i in 1:nparticles){
     
-    cat("Particle:",i,"of",nparticles,"\n")
+    #cat("Particle:",i,"of",nparticles,"\n")
+    if (i %% 10 == 0) {
+      setTxtProgressBar(objprogress, i)
+    }
     thisparticle <- input[input[,7]==i,]
     pinned <- matrix(ncol=1,nrow=nrow(thisparticle))
     
@@ -61,7 +68,7 @@ sdpchpintag = function(input,chunkwidth,sdthresh){
   
   # Sort by frame rather than by particle
   output <- output[sort.list(output[,6]),]
-  
+  close(objprogress)
   return(output)
   
 }

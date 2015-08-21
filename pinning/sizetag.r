@@ -12,12 +12,20 @@ sizetag = function(input,cutoff){
   # How many particles?
   nparticles <- max(input[,7])
   
+  cat("Progress of particle tagging\n")
+
+  objprogress <- txtProgressBar(min=0, max=nparticles-1, style=3)
+
   output <- matrix(nrow=nrow(input),ncol=8)
   output[,1:7] <- input
   
   # Loop over particles
   for (i in 1:nparticles){
-    cat("Particle:",i,"\n")
+    #cat("Particle:",i,"\n")
+    if (i %% 10 == 0) {
+    setTxtProgressBar(objprogress, i)
+    }
+
     w <- which(input[,7]==i)
     avgbright <- mean(input[w,3])
     if (avgbright >= cutoff){
@@ -27,6 +35,7 @@ sizetag = function(input,cutoff){
     }
   }
   
+  close(objprogress)
   return(output)
   
 }
