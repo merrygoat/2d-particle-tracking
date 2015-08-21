@@ -39,7 +39,7 @@ confocaltrackroutine = function(){
     imgtiffstack <- suppressWarnings(readImage(paste(varfilename,".tif",sep="")))   #Supress to avoid warnings about unreadable metadata
   }
   else {
-    imgtiffstack <- paste(varfilename,"000.tif",sep="") #If no tiff stack, read in one image anyway to get the dimensions.
+    imgtiffstack <- readImage(paste(varfilename,"000.tif",sep="")) #If no tiff stack, read in one image anyway to get the dimensions.
   }
   
   varimgx <- dim(imgtiffstack)[1]          #Width of the image in pixels

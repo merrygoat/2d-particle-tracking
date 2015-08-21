@@ -1,76 +1,67 @@
 #!/usr/bin/env Rscript
 
-# Particle identification tracking and characterisation for 2D brightfiled images of pinned particles
+# Particle identification tracking and characterisation for 2D brightfield images of pinned particles
 
 pinningtrackroutine = function() {
-
-  # # READING THINGS BACK IN
-  # #####################################
-  # setwd("/Volumes/WIN_DATA/Pinning/Slide_12")
   
-  # pt <- read.table("pretrack.dat",sep="\t")
-  # pt <- data.matrix(pt)
-  
-  # tr <- read.table("track.dat",sep="\t")
-  # tr <- data.matrix(tr)
-  
-  # trsize <- read.table("track_sizetag.dat",sep="\t")
-  # trsize <- data.matrix(trsize)
-  
-  # pntag <- read.table("track_sizepintag.dat",sep="\t")
-  # pntag <- data.matrix(pntag)
-  
-  # trbignonpin <- read.table("track_unpinned_big.dat",sep="\t")
-  # trbignonpin <- data.matrix(trbignonpin)
-  
-  # trsmallnonpin <- read.table("track_unpinned_small.dat",sep="\t")
-  # trsmallnonpin <- data.matrix(trsmallnonpin)
-  
-  # voro <- read.table("tr_voronoi.dat",sep="\t")
-  # voro <- data.matrix(voro)
-  
-  # #####################################
-  
+  # Setup r scripts
   setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
   filelist <- c("pre_tracking/lowpass.r", "pre_tracking/feature.r", "pre_tracking/pretrack.r", "tracking/iantrack.r", "pinning/sizetag.r", "pinning/sdpchpintag.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
+  #File directory variables
+  istiffstack <- FALSE     #Set to true if the images are read in as a single compound tiff image
+  varfilename <- "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/sample12-2pm_0000"
+  vardirname <- "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/"
   
-  # TESTING STUFF BEFORE BATCH TRACKING
-  #####################################
-  img <- channel(readImage("Images/sample5_2.55pm_00000001.tif"),"grey")
-  lp<-lowpass(img,lobject=11,bgavg=13)
-  f<-feature(lp,diameter=15,masscut=8,minimum=0.2)
-  #####################################
+  #Setting variables
+  varcutoff <- 26      # the diameter cutoff between large and small particles
   
-  # ACTUAL TRACKING
-  #####################################
-  # binaryfeature.r is retired after cocking up one too many times
-  # Now the size identification is last thing we do after tracking!
-  #####################################
+  #Pretrack variables
+  varimages <- 100        #How many image to read from varfilename
+  vardiameter <-15        #Particle diamter - used in particle identification
+  varfilter <-11          #Parameter for lowpass filter
+  varbgavg <- 13          #Parameter for lowpass filter
+  varmasscut <- 8         #Lowest integrated brightness for particle
+  varminimum <- 0.2       #Lowest pixel value for center of particle
   
-  pt <- pretrack(filename="Images/sample5_2.55pm_0000",images=3740,startimg=1,diameter=15,masscut=8,minimum=0.2,filter=11,bgavg=13)
+  #Track variables
+  varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
+  varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
+  
+  # Science variables
+  varbigparticlesize = 24.3    #Used as the wavevector for isf
+  varsmallparticlesize = 14.9    #Used as the wavevector for isf
+  
+  ########################### Main ###########################
+  
+  if (istiffstack == TRUE) {
+    cat("Reading image file.\n")
+    imgtiffstack <- suppressWarnings(readImage(paste(varfilename,".tif",sep="")))   #Supress to avoid warnings about unreadable metadata
+  }
+  else {
+    imgtiffstack <- readImage(paste(varfilename,"0000.tif",sep="")) #If no tiff stack, read in one image anyway to get the dimensions.
+  }
+  
+  varimgx <- dim(imgtiffstack)[1]          #Width of the image in pixels
+  varimgy <- dim(imgtiffstack)[2]          #Height of the image in pixels
+  
+  # Particle identification
+  pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,masscut=varmasscut,minimum=varminimum,filter=varfilter,bgavg=varbgavg)
   pt[,6] <- pt[,6] - 1
-  write(t(pt),file="pretrack.dat",ncolumns=6,sep="\t")
   
-  tr <- iantrack(pretrack=pt,maxdisp=5,imgsize=c(768,768),goodenough=2)
-  write(t(tr),file="track.dat",ncolumns=7,sep="\t")
+  # Filter the data to cut out particles which are withing varedgecutoff pixels of the edge of the image.
+  ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
+
+  # Particle tracking
+  tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=2)
   
   # Cutoff between big and small particles. Do a histo here to determine the cutoff.
-  trsize <- sizetag(tr,cutoff=26)
-  write(t(trsize),file="track_sizetag.dat",ncolumns=8,sep="\t")
+  trsize <- sizetag(tr,cutoff=varcutoff)
+  write(t(trsize),file="track.dat",ncolumns=8,sep="\t")
   # 1 = big, 0 = small
   
-  # This is the old pintag method
-  #pntag <- pintagoct(trsize,longinterval=50,longthresh=1.0,posthresh=0.7)
-  # Remove the first 50 frames and renumber from 0
-  #w<-which(pntag[,6]>50)
-  #pntag <- pntag[w,]
-  #pntag[,6] <- pntag[,6]-50
-  #write(t(pntag),file="track_sizepintag.dat",ncolumns=9,sep="\t")
-  
-  # New pintag based on sd position in time chunks
   # Remember to alter the chunkwidth based on density
   pntag <- sdpchpintag(trsize,chunkwidth=1000,sdthresh=0.3)
   
@@ -111,12 +102,10 @@ pinningtrackroutine = function() {
   write(t(trsmallnonpin),file="track_unpinned_small.dat",ncolumns=9,sep="\t")
   
   
-  
-  
   # Some static and dynamic analysis
   ###################################
   w <- which(trsize[,6]<5)
-  gr <- gr2d(trsize[w,],nbins=500,deltar=0.1,imgsize=c(768,768),binary=TRUE)
+  gr <- gr2d(trsize[w,],nbins=500,deltar=0.1,imgsize=c(varedgecutoff,varedgecutoff,varimgx-varedgecutoff,varimgy-varedgecutoff),binary=TRUE)
   write(t(gr),file="grbinary.dat",ncolumns=4,sep="\t")
   
   msdbig <- msd(trbignonpin,drift=TRUE)
@@ -125,14 +114,13 @@ pinningtrackroutine = function() {
   msdsmall <- msd(trsmallnonpin,drift=TRUE)
   write(t(msdsmall),file="msd_unpinned_small.dat",ncolumns=7,sep="\t")
   
-  isfbig <- isf(trbig,length=24.3,drift=TRUE)
+  isfbig <- isf(trbig,length=varbigparticlesize,drift=TRUE)
   write(t(isfbig),file="isf_all_big.dat",ncolumns=5,sep="\t")
   
-  isfsmall <- isf(trsmall,length=14.9,drift=TRUE)
+  isfsmall <- isf(trsmall,length=varsmallparticlesize,drift=TRUE)
   write(t(isfsmall),file="isf_all_small.dat",ncolumns=5,sep="\t")
   
-  
-  voro <- newvoroseries(trsize,imgsize=c(768,768),edgerm=50)
+  voro <- newvoroseries(trsize,imgsize=c(varedgecutoff,varedgecutoff,varimgx-varedgecutoff,varimgy-varedgecutoff),edgerm=50)
   write(t(voro),file="tr_voronoi.dat",ncolumns=10,sep="\t")
   
   vorphi <- voronoibinaryareafrac(voro)
