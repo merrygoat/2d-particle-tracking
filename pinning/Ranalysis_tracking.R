@@ -30,6 +30,10 @@ pinningtrackroutine = function() {
   varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
+  #Pinning varibales
+  varchunkwidth <- 1000   # The time window used to look for pinning. Alter as a function of the relaxation time of the system.
+  versdthresh <- 0.3      # The threshold below which things are pinned
+  
   # Science variables
   varbigparticlesize = 24.3    #Used as the wavevector for isf
   varsmallparticlesize = 14.9    #Used as the wavevector for isf
@@ -58,12 +62,13 @@ pinningtrackroutine = function() {
   tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=2)
   
   # Cutoff between big and small particles. Do a histo here to determine the cutoff.
+  hist(tr[,3],breaks = seq(0,1000), xlim=c(10,35))
   trsize <- sizetag(tr,cutoff=varcutoff)
   write(t(trsize),file="track.dat",ncolumns=8,sep="\t")
   # 1 = big, 0 = small
   
-  # Remember to alter the chunkwidth based on density
-  pntag <- sdpchpintag(trsize,chunkwidth=1000,sdthresh=0.3)
+  # Determine what is pinned
+  pntag <- sdpchpintag(trsize,chunkwidth=varchunkwidth,sdthresh=varsdthresh)
   
   pntag <- pintidy(pntag)
   write(t(pntag),file="track_sizepintag.dat",ncolumns=9,sep="\t")
@@ -77,30 +82,29 @@ pinningtrackroutine = function() {
   # Split tracks up a bit
   #######################
   
-  w <- which(pntag[,8]==1)
-  trbig <- pntag[w,]
-  write(t(trbig),file="track_big.dat",ncolumns=8,sep="\t")
-  
-  w <- which(pntag[,8]==0)
-  trsmall <- pntag[w,]
-  write(t(trsmall),file="track_small.dat",ncolumns=8,sep="\t")
-  
-  w <- which(pntag[,9]==1)
-  trpins <- pntag[w,]
-  write(t(trpins),file="track_pins.dat",ncolumns=9,sep="\t")
-  
-  w <- which(pntag[,9]==0)
-  trnonpin <- pntag[w,]
-  write(t(trnonpin),file="track_unpinned.dat",ncolumns=9,sep="\t")
-  
-  w <- which(trbig[,9]==0)
-  trbignonpin <- trbig[w,]
-  write(t(trbignonpin),file="track_unpinned_big.dat",ncolumns=9,sep="\t")
-  
-  w <- which(trsmall[,9]==0)
-  trsmallnonpin <- trsmall[w,]
-  write(t(trsmallnonpin),file="track_unpinned_small.dat",ncolumns=9,sep="\t")
-  
+#   w <- which(pntag[,8]==1)
+#   trbig <- pntag[w,]
+#   write(t(trbig),file="track_big.dat",ncolumns=8,sep="\t")
+#   
+#   w <- which(pntag[,8]==0)
+#   trsmall <- pntag[w,]
+#   write(t(trsmall),file="track_small.dat",ncolumns=8,sep="\t")
+#   
+#   w <- which(pntag[,9]==1)
+#   trpins <- pntag[w,]
+#   write(t(trpins),file="track_pins.dat",ncolumns=9,sep="\t")
+#   
+#   w <- which(pntag[,9]==0)
+#   trnonpin <- pntag[w,]
+#   write(t(trnonpin),file="track_unpinned.dat",ncolumns=9,sep="\t")
+#   
+#   w <- which(trbig[,9]==0)
+#   trbignonpin <- trbig[w,]
+#   write(t(trbignonpin),file="track_unpinned_big.dat",ncolumns=9,sep="\t")
+#   
+#   w <- which(trsmall[,9]==0)
+#   trsmallnonpin <- trsmall[w,]
+#   write(t(trsmallnonpin),file="track_unpinned_small.dat",ncolumns=9,sep="\t")
   
   # Some static and dynamic analysis
   ###################################

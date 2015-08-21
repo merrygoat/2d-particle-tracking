@@ -6,6 +6,8 @@
 # Calculates the standard deviation in position for each of these chunks
 # Maybe helpful in pin identification
 
+# Used by sdpchpintag.r
+
 sdposchunks = function(input,chunkwidth){
   
   startframe <- min(input[,6])
