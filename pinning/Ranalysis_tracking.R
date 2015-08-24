@@ -2,15 +2,15 @@
 
 # Particle identification tracking and characterisation for 2D brightfield images of pinned particles
 
-pinningtrackroutine = function(ptdone=FALSE) {
+pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   
   # Setup r scripts
   setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
   filelist <- c("pre_tracking/lowpass.r", "pre_tracking/feature.r", "pre_tracking/pretrack.r", "tracking/iantrack.r", 
-                "pinning/sizetag.r", "pinning/sdpchpintag.r", "pinning/sdposchunks.r", #"pinning/pintidy.r",
-                "pinning/pinsintime.r", #"characterisation/binaryparticlecount.r",
-                "characterisation/gr2d.r", "characterisation/msd.r", "characterisation/isf.r",
-                "characterisation/newvoroseries.r", "characterisation/voronoibinaryareafrac.r", "characterisation/neighboursbinary.r" )
+                "pinning/sizetag.r", "pinning/sdpchpintag.r", "pinning/sdposchunks.r", "pinning/pintidy.r", "pinning/pinsintime.r",
+                "characterisation/binaryparticlecount.r", "characterisation/gr2d.r", "characterisation/msd.r", "characterisation/isf.r",
+                "characterisation/newvoroseries.r", "characterisation/voronoibinaryareafrac.r", "characterisation/neighboursbinary.r",
+                "pinning/peterpinning.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
@@ -24,7 +24,7 @@ pinningtrackroutine = function(ptdone=FALSE) {
   varcutoff <- 26      # the diameter cutoff between large and small particles
   
   #Pretrack variables
-  varimages <- 100        #How many image to read from varfilename
+  varimages <- 1192        #How many image to read from varfilename
   vardiameter <-15        #Particle diamter - used in particle identification
   varfilter <-11          #Parameter for lowpass filter
   varbgavg <- 13          #Parameter for lowpass filter
@@ -36,8 +36,8 @@ pinningtrackroutine = function(ptdone=FALSE) {
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Pinning varibales
-  varchunkwidth <- 1000   # The time window used to look for pinning. Alter as a function of the relaxation time of the system.
-  versdthresh <- 0.3      # The threshold below which things are pinned
+  varchunkwidth <- 100   # The time window used to look for pinning. Alter as a function of the relaxation time of the system.
+  varsdthresh <- 0.3      # The threshold below which things are pinned
   
   # Science variables
   varbigparticlesize = 24.3    #Used as the wavevector for isf
@@ -50,7 +50,7 @@ pinningtrackroutine = function(ptdone=FALSE) {
     imgtiffstack <- suppressWarnings(readImage(paste(varfilename,".tif",sep="")))   #Supress to avoid warnings about unreadable metadata
   }
   else {
-    imgtiffstack <- suppressWarnings(readImage(paste(varfilename,"0000.tif",sep=""))) #If no tiff stack, read in one image anyway to get the dimensions.
+    imgtiffstack <- suppressWarnings(readImage(paste(varfilename,"0000.tif",sep=""))) #If no tiff stack, read in one image to get the dimensions.
   }
   
   varimgx <- dim(imgtiffstack)[1]          #Width of the image in pixels
@@ -71,13 +71,23 @@ pinningtrackroutine = function(ptdone=FALSE) {
   ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
 
   # Particle tracking
-  tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=2)
+  if (trdone == FALSE) {
+    tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=2)
+    write(t(tr),file="track.dat",ncolumns=7,sep="\t")
+  }
+  else {
+    tr <- read.table("track.dat",sep="\t")
+    tr <- data.matrix(tr)
+  }
   
   # Cutoff between big and small particles. Do a histo here to determine the cutoff.
   hist(tr[,3],breaks = seq(0,1000), xlim=c(10,35))
   trsize <- sizetag(tr,cutoff=varcutoff)
   write(t(trsize),file="track.dat",ncolumns=8,sep="\t")
   # 1 = big, 0 = small
+  
+  pntag = peterpinning(trsize)
+  
   
   # Determine what is pinned
   pntag <- sdpchpintag(trsize,chunkwidth=varchunkwidth,sdthresh=varsdthresh)

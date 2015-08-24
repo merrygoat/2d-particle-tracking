@@ -5,7 +5,7 @@
 # Calculate number of pinned particles in each frame?
 # Uses output from pintagoct.r
 
-peterpinning = function(input,chunkwidth,sdthresh){
+peterpinning = function(input){
 
   nparticles <- max(input[,7])
   
@@ -15,7 +15,7 @@ peterpinning = function(input,chunkwidth,sdthresh){
   cat("Progress of particle pin determination\n")
   objprogress <- txtProgressBar(min=0, max=nparticles-1, style=3)
   
-  displacement <- matrix(ncol=1,nrow=nrow(nparticles))
+  displacement <- matrix(ncol=1,nrow=nparticles)
   
   for(i in 1:nparticles){
     

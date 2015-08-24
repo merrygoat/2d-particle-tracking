@@ -66,9 +66,9 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
     #cat("Reading image ",i,"\n")
     thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".tif",sep="")
     #cat(thisimagename,"\n")
-    thisimage <- channel(readImage(thisimagename), chan)
+    thisimage <- suppressWarnings(channel(readImage(thisimagename), chan))  #Supress warnings stops complaint about unreadable metadata
     }
-    else {
+    else {          # If we are reading from a TIFF stack then the image was already loaded earlier, just read it
       thisimage <- getFrame(imgtiffstack,i+1)
     }
     
