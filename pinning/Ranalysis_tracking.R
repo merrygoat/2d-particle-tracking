@@ -5,7 +5,7 @@
 pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   
   # Setup r scripts
-  setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
+  setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking") #"/Users/pc9836/Documents/git/2d-particle-tracking")
   filelist <- c("pre_tracking/lowpass.r", "pre_tracking/feature.r", "pre_tracking/pretrack.r", "tracking/iantrack.r", 
                 "pinning/sizetag.r", "pinning/sdpchpintag.r", "pinning/sdposchunks.r", "pinning/pintidy.r", "pinning/pinsintime.r",
                 "characterisation/binaryparticlecount.r", "characterisation/gr2d.r", "characterisation/msd.r", "characterisation/isf.r",
@@ -16,15 +16,15 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   
   #File directory variables
   istiffstack <- FALSE     #Set to true if the images are read in as a single compound tiff image
-  varfilename <- "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/sample12-2pm_0000"
-  vardirname <- "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/"
+  varfilename <- "D:\\Pinning\\Slide_12\\10_mins\\sample12-2pm_0000" #"/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/sample12-2pm_0000"
+  vardirname <- "D:\\Pinning\\Slide_12\\10_mins" #"/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/"
   setwd(vardirname)
   
   #Setting variables
   varcutoff <- 26      # the diameter cutoff between large and small particles
   
   #Pretrack variables
-  varimages <- 1192        #How many image to read from varfilename
+  varimages <- 400       #How many image to read from varfilename
   vardiameter <-15        #Particle diamter - used in particle identification
   varfilter <-11          #Parameter for lowpass filter
   varbgavg <- 13          #Parameter for lowpass filter
@@ -63,6 +63,7 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
     write(t(pt),file="pretrack.dat",ncolumns=6,sep="\t")
   }
   else {
+    cat("Reading data from pre-track file\n")
     pt <- read.table("pretrack.dat",sep="\t")
     pt <- data.matrix(pt)
   }
@@ -76,6 +77,7 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
     write(t(tr),file="track.dat",ncolumns=7,sep="\t")
   }
   else {
+    cat("Reading data from track file\n")
     tr <- read.table("track.dat",sep="\t")
     tr <- data.matrix(tr)
   }
@@ -83,11 +85,10 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   # Cutoff between big and small particles. Do a histo here to determine the cutoff.
   hist(tr[,3],breaks = seq(0,1000), xlim=c(10,35))
   trsize <- sizetag(tr,cutoff=varcutoff)
-  write(t(trsize),file="track.dat",ncolumns=8,sep="\t")
+  write(t(trsize),file="track_sized.dat",ncolumns=8,sep="\t")
   # 1 = big, 0 = small
   
   pntag = peterpinning(trsize)
-  
   
   # Determine what is pinned
   pntag <- sdpchpintag(trsize,chunkwidth=varchunkwidth,sdthresh=varsdthresh)

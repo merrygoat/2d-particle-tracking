@@ -9,30 +9,42 @@ peterpinning = function(input){
 
   nparticles <- max(input[,7])
   
-  # output is: trsize + additional pin tag column
-  output <- matrix(nrow=1,ncol=(ncol(input)+1))
-  
   cat("Progress of particle pin determination\n")
   objprogress <- txtProgressBar(min=0, max=nparticles-1, style=3)
   
-  displacement <- matrix(ncol=1,nrow=nparticles)
+  input <- input[order(input[,7]), ]   # Sorting is super fast - make use of this to avoid use of which()
   
-  for(i in 1:nparticles){
+  displacement <- matrix(data = 0, ncol=1,nrow=nparticles)
+  linecounter <- 1
+  for(i in 1:(nparticles-1)){
     
-    if (i %% 10 == 0) {
+    if (i %% 100 == 0) {
       setTxtProgressBar(objprogress, i)
     }
-	
-    thisparticle <- input[input[,7]==i,]
-    pinned <- matrix(ncol=1,nrow=nrow(thisparticle))
-    	
-	#Get displacement of the particle in each frame
-	for (j in 1:nrow(thisparticle)){
-		displacement[i] = displacement[i] +(((thisparticle[j][1] - thisparticle[j+1][1])^2 + (thisparticle[j][1] - thisparticle[j+1][1])^2)^(1/2))/(thisparticle[j][6]-thisparticle[j][6])
-	}  
+    
+    # Section to seperate out each frame of particle i into a matrix called thisparticle
+    thisparticle <- matrix(data=0, nrow=1, ncol=8)
+    breaker <- FALSE
+    
+    while (breaker == FALSE) {
+      if (input[linecounter,7] == i){
+        newrow <- input[linecounter,]
+        thisparticle <- rbind(thisparticle,newrow)
+        linecounter <- linecounter + 1
+      }
+      else{
+        breaker <- TRUE
+      }
+    }
+
+    
+    #Get displacement of the particle in each frame
+	  for (j in 2:(nrow(thisparticle)-1)){    #Skip the first row, it is blank
+		  displacement[i] = displacement[i] +(((thisparticle[j, 1] - thisparticle[j+1, 1])^2 + (thisparticle[j, 2] - thisparticle[j+1, 2])^2)^(1/2))/(thisparticle[j+1, 6]-thisparticle[j, 6])
+	  }  
   }
   
-  hist(displacement)
+  hist(displacement, breaks = seq(0,1000), xlim=c(0,50))
   
   #output <- output[2:nrow(output),]
   
