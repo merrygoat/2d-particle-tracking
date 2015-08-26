@@ -5,7 +5,7 @@
 pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   
   # Setup r scripts
-  setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking") #"/Users/pc9836/Documents/git/2d-particle-tracking")
+  setwd("/Users/pc9836/Documents/git/2d-particle-tracking")    # "C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking")
   filelist <- c("pre_tracking/lowpass.r", "pre_tracking/feature.r", "pre_tracking/pretrack.r", "tracking/iantrack.r", 
                 "pinning/sizetag.r", "pinning/sdpchpintag.r", "pinning/sdposchunks.r", "pinning/pintidy.r", "pinning/pinsintime.r",
                 "characterisation/binaryparticlecount.r", "characterisation/gr2d.r", "characterisation/msd.r", "characterisation/isf.r",
@@ -16,8 +16,8 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   
   #File directory variables
   istiffstack <- FALSE     #Set to true if the images are read in as a single compound tiff image
-  varfilename <- "D:\\Pinning\\Slide_12\\10_mins\\sample12-2pm_0000" #"/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/sample12-2pm_0000"
-  vardirname <- "D:\\Pinning\\Slide_12\\10_mins" #"/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/"
+  varfilename <- "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/sample12-2pm_0000"   #"D:\\Pinning\\Slide_12\\10_mins\\sample12-2pm_0000" 
+  vardirname <-  "/Volumes/WIN_DATA/Pinning/Slide_12/10_mins/"    #"D:\\Pinning\\Slide_12\\10_mins"
   setwd(vardirname)
   
   #Setting variables
@@ -88,7 +88,7 @@ pinningtrackroutine = function(ptdone=FALSE, trdone=FALSE) {
   write(t(trsize),file="track_sized.dat",ncolumns=8,sep="\t")
   # 1 = big, 0 = small
   
-  pntag = peterpinning(trsize)
+  pntag <- peterpinning(trsize)
   
   # Determine what is pinned
   pntag <- sdpchpintag(trsize,chunkwidth=varchunkwidth,sdthresh=varsdthresh)

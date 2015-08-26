@@ -17,11 +17,11 @@ sizetag = function(input,cutoff){
   
   cat("Differentiating between large and small particles...\n")
 
-  output <- matrix(nrow=nrow(input),ncol=8)
-  output[,1:7] <- input
-  
   input <- input[order(input[,7]), ]   # Sorting is super fast - make use of this to avoid use of which()
   
+  output <- matrix(nrow=nrow(input),ncol=8)
+  output[,1:7] <- input
+    
   brightness <- matrix(data=0, nrow=nparticles, ncol=3)     # Coulmns are summed brightness, num samples and mean
 
   # loop through once collecting and summing the brightnesses
