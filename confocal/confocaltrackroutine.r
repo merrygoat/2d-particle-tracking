@@ -11,12 +11,11 @@ confocaltrackroutine = function(){
   library(EBImage)
   
   #File directory variables
-  istiffstack <- TRUE     #Set to true if the images are read in as a single compound tiff image
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos7/FITC-0.52-pos7"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-08-04/pos7/"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/images/a"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/images/"
   
   #Pretrack variables
-  varimages <- 200        #How many image to read from varfilename
+  varimages <- 50        #How many image to read from varfilename
   vardiameter <-19        #Particle diamter - used in particle identification
   varfilter <-11          #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
@@ -34,29 +33,18 @@ confocaltrackroutine = function(){
   
   ### Main ###
   
-  if (istiffstack == TRUE) {
-    cat("Reading image file.\n")
-    imgtiffstack <- suppressWarnings(readImage(paste(varfilename,".tif",sep="")))   #Supress to avoid warnings about unreadable metadata
-  }
-  else {
-    imgtiffstack <- suppressWarnings(readImage(paste(varfilename,"000.tif",sep=""))) #If no tiff stack, read in one image anyway to get the dimensions.
-  }
+  testimg <- readImage(paste(varfilename,"0000.png",sep=""))
   
-  varimgx <- dim(imgtiffstack)[1]          #Width of the image in pixels
-  varimgy <- dim(imgtiffstack)[2]          #Height of the image in pixels
+  varimgx <- dim(testimg)[1]          #Width of the image in pixels
+  varimgy <- dim(testimg)[2]          #Height of the image in pixels
   
-  pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey", istiffstack = istiffstack, imgtiffstack = imgtiffstack)
+  pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey")
   ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
   
   #Print out some sample overcircled images so the user can check the tracking is OK.  
   for(i in 0:9) {
-    if (istiffstack == FALSE) {
-      imagecn <- paste(varfilename,formatC(round(i/10*varimages),flag="0",digits=3),".tif",sep="") 
-      imagecn <- channel(readImage(imagecn), "grey")
-    }
-    else {
-      imagecn <- getFrame(imgtiffstack, round(i/10*varimages)+1)
-    }
+    imagecn <- paste(varfilename,formatC(round(i/10*varimages),flag="0",digits=3),".png",sep="") 
+    imagecn <- channel(readImage(imagecn), "grey")
     
     temp <- pt[ptfilt,]
     ptmask <- which(temp[,6] == round(i/10*varimages))
