@@ -12,7 +12,7 @@ confocaltrackroutine = function(){
   
   #File directory variables
   varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/images/a"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/images/"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/"
   
   #Pretrack variables
   varimages <- 50        #How many image to read from varfilename
@@ -80,5 +80,12 @@ confocaltrackroutine = function(){
   gr <- cbind(gr[,1], gr[,1]/varparticlesize, gr[,2]) # multiply the first column by vartimestep to give time in seconds
   gr <- rbind(c("Distance (Diameters)", "Distance (Pixels)", "g(r)"), gr)
   write(t(gr),file=paste(vardirname, "gr.txt"),ncolumns=3,sep="\t")
+  
+  #Measure the quality of our tracking by dividing dyanmic samples by msd
+  trackingquality <- matrix(ncol=5,nrow=varimages-1)
+  trackingquality[,1:2] <- msq[-1,8:9]
+  trackingquality[,3] <- as.numeric(trackingquality[,2])/as.numeric(trackingquality[1,2])
+  trackingquality[,4] <- abs(as.numeric(trackingquality[,3])-(1/exp(1)))
+  cat("Diameters diffusion by 1/e complete particle tracks = ", format(round(trackingquality[which(trackingquality[,4] == min(trackingquality[,4])),1]), 2), nsmall = 2)
   
 }
