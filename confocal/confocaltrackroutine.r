@@ -86,6 +86,6 @@ confocaltrackroutine = function(){
   trackingquality[,1:2] <- msq[-1,8:9]
   trackingquality[,3] <- as.numeric(trackingquality[,2])/as.numeric(trackingquality[1,2])
   trackingquality[,4] <- abs(as.numeric(trackingquality[,3])-(1/exp(1)))
-  cat("Diameters diffusion by 1/e complete particle tracks = ", format(round(trackingquality[which(trackingquality[,4] == min(trackingquality[,4])),1]), 2), nsmall = 2)
+  cat("Diameters diffusion by 1/e complete particle tracks = ", round(as.numeric(trackingquality[which(trackingquality[,4] == min(trackingquality[,4])),1]),2))
   
 }
