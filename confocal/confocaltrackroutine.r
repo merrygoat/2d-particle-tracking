@@ -11,25 +11,27 @@ confocaltrackroutine = function(){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/images/a"
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-09-21/"
+  #varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-11-12/vi/images/vi"
+  varfilename <- "/Volumes/WIN_DATA/Julien/smooth/i_smooth"
+  #put slash on end of dirname
+  vardirname <- "/Volumes/WIN_DATA/Julien/smooth/"
   
   #Pretrack variables
-  varimages <- 50        #How many image to read from varfilename
-  vardiameter <-19        #Particle diamter - used in particle identification
-  varfilter <-11          #Parameter for lowpass filter
+  varimages <- 40        #How many image to read from varfilename
+  vardiameter <- 15       #Particle diameter - used in particle identification
+  varfilter <- 11         #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
   varmasscut <- 1         #Lowest integrated brightness for particle
   varminimum <- 0.1       #Lowest pixel value for center of particle
   
   #Track variables
   varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
-  varmaxdisp <- 8         #Used in tracking - the maximum allowed interframe displacement
+  varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 1         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 20      #How many frames of data to analyse for the g(r)
+  varparticlesize = 15    #Used as the wavevector for isf
+  vartimestep = 0.05         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vargofrframes = 40      #How many frames of data to analyse for the g(r)
   
   ### Main ###
   
@@ -44,7 +46,13 @@ confocaltrackroutine = function(){
   #Print out some sample overcircled images so the user can check the tracking is OK.  
   for(i in 0:9) {
     imagecn <- paste(varfilename,formatC(round(i/10*varimages),flag="0",digits=3),".png",sep="") 
-    imagecn <- channel(readImage(imagecn), "grey")
+    #imagecn <- channel(readImage(imagecn), "gray")
+    
+    r <- channel(readImage(imagecn), "r")
+    g <- channel(readImage(imagecn), "g")
+    b <- channel(readImage(imagecn), "b")
+    
+    imagecn <- 0.21*r+0.71*g+0.07*b
     
     temp <- pt[ptfilt,]
     ptmask <- which(temp[,6] == round(i/10*varimages))
@@ -58,28 +66,29 @@ confocaltrackroutine = function(){
   for(i in 0:varimages-1) {particlecount[i] <- sum(pt[ptfilt,6] == i)}
   particlecount <- cbind(seq(1,varimages-1), seq(1,varimages-1)*vartimestep, matrix(particlecount))
   particlecount <- rbind(c("Frames", "Time", "Particle Count"), particlecount)
-  write(t(particlecount),file=paste(vardirname, "particlecount.txt"),ncolumns=3,sep="\t")
+  write(t(particlecount),file=paste(vardirname, "particlecount.txt", sep=""),ncolumns=3,sep="\t")
   
   tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
   
+  write(t(tr),file=paste(vardirname, "raw_coords.txt", sep=""),ncolumns=7,sep="\t")
   #Don't need to filter tr as it was already filtered from pt
   #Do msd and write it out
   msq <- msd(tr)
   msq <- cbind(msq[,1], msq[,1]*vartimestep, msq[,2:6], msq[,6]/varparticlesize, msq[,7]) # multiply the first column by vartimestep to give time in seconds, divide the 6th column to give msd in dimeters
   msq <- rbind(c("Frames", "Time", "Mean dx", "Mean dy", "Mean dx^2", "Mean dy^2", "Mean dr^2 (Pixels)", "Mean dr^2 (Diameters)", "Particle Count"), msq)
-  write(t(msq),file=paste(vardirname, "msd.txt"),ncolumns=9,sep="\t")
+  write(t(msq),file=paste(vardirname, "msd.txt", sep=""),ncolumns=9,sep="\t")
   
   #Do isf and write it out
   fsqt <- isf(tr,length=19)
   fsqt <- cbind(fsqt[,1], fsqt[,1]*vartimestep, fsqt[,2:5]) # multiply the first column by vartimestep to give time in seconds
   fsqt <- rbind(c("Frames", "Time", "Real", "Imaginary", "Modulus", "Samples"), fsqt)
-  write(t(fsqt), file=paste(vardirname, "isf.txt"), ncolumns=6, sep="\t")
+  write(t(fsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=6, sep="\t")
   
   #Do g(r) and write it out
   gr <- gr2d(tr,nbins=200,deltar=0.5,imgsize=c(varedgecutoff,varedgecutoff,varimgx-varedgecutoff,varimgy-varedgecutoff), nframes=vargofrframes)
   gr <- cbind(gr[,1], gr[,1]/varparticlesize, gr[,2]) # multiply the first column by vartimestep to give time in seconds
   gr <- rbind(c("Distance (Diameters)", "Distance (Pixels)", "g(r)"), gr)
-  write(t(gr),file=paste(vardirname, "gr.txt"),ncolumns=3,sep="\t")
+  write(t(gr),file=paste(vardirname, "gr.txt", sep=""),ncolumns=3,sep="\t")
   
   #Measure the quality of our tracking by dividing dyanmic samples by msd
   trackingquality <- matrix(ncol=5,nrow=varimages-1)
