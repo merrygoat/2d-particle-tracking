@@ -6,19 +6,19 @@ confocaltrackroutine = function(){
   
   # source all scripts in the current directory
   setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
-  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
+  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
   #File directory variables
   #varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-11-12/vi/images/vi"
-  varfilename <- "/Volumes/WIN_DATA/Julien/smooth/i_smooth"
+  varfilename <- "/Users/pc9836/Dropbox/Confocal/Paddy 2009/v"
   #put slash on end of dirname
-  vardirname <- "/Volumes/WIN_DATA/Julien/smooth/"
+  vardirname <- "/Users/pc9836/Dropbox/Confocal/"
   
   #Pretrack variables
-  varimages <- 40        #How many image to read from varfilename
-  vardiameter <- 15       #Particle diameter - used in particle identification
+  varimages <- 128        #How many image to read from varfilename
+  vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 11         #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
   varmasscut <- 1         #Lowest integrated brightness for particle
@@ -29,9 +29,9 @@ confocaltrackroutine = function(){
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 15    #Used as the wavevector for isf
+  varparticlesize = 10    #Used as the wavevector for isf
   vartimestep = 0.05         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 40      #How many frames of data to analyse for the g(r)
+  vargofrframes = 10      #How many frames of data to analyse for the g(r)
   
   ### Main ###
   
@@ -69,6 +69,8 @@ confocaltrackroutine = function(){
   write(t(particlecount),file=paste(vardirname, "particlecount.txt", sep=""),ncolumns=3,sep="\t")
   
   tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
+  
+  tr <- driftremoval(tr, display_graphs = TRUE)
   
   write(t(tr),file=paste(vardirname, "raw_coords.txt", sep=""),ncolumns=7,sep="\t")
   #Don't need to filter tr as it was already filtered from pt
