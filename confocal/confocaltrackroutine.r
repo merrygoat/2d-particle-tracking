@@ -2,19 +2,20 @@
 
 # Particle identification tracking and characterisation for 2D confocal images
 
-confocaltrackroutine = function(){
+confocaltrackroutine = function(remove_drift = TRUE){
   
   # source all scripts in the current directory
-  setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
-  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
+  #setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
+  setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking")
+  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
   #File directory variables
   #varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-11-12/vi/images/vi"
-  varfilename <- "/Users/pc9836/Dropbox/Confocal/Paddy 2009/v"
+  varfilename <- "C:\\Users\\Peter\\Dropbox\\Confocal\\Paddy 2009\\v"
   #put slash on end of dirname
-  vardirname <- "/Users/pc9836/Dropbox/Confocal/"
+  vardirname <- "C:\\Users\\Peter\\Dropbox\\Confocal\\"
   
   #Pretrack variables
   varimages <- 128        #How many image to read from varfilename
@@ -25,13 +26,14 @@ confocaltrackroutine = function(){
   varminimum <- 0.1       #Lowest pixel value for center of particle
   
   #Track variables
-  varedgecutoff <- 15     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
+  varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
   varparticlesize = 10    #Used as the wavevector for isf
-  vartimestep = 0.05         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vartimestep = 1         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 10      #How many frames of data to analyse for the g(r)
+  
   
   ### Main ###
   
@@ -69,19 +71,25 @@ confocaltrackroutine = function(){
   write(t(particlecount),file=paste(vardirname, "particlecount.txt", sep=""),ncolumns=3,sep="\t")
   
   tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
-  
-  tr <- driftremoval(tr, display_graphs = TRUE)
+  if(remove_drift == TRUE) 
+    {trnodrift <- driftremoval(tr, display_graphs = TRUE)}
   
   write(t(tr),file=paste(vardirname, "raw_coords.txt", sep=""),ncolumns=7,sep="\t")
   #Don't need to filter tr as it was already filtered from pt
   #Do msd and write it out
-  msq <- msd(tr)
+  if(remove_drift == TRUE) 
+    {msq <- msd(trnodrift)}
+  else
+    {msq <- msd(tr)}
   msq <- cbind(msq[,1], msq[,1]*vartimestep, msq[,2:6], msq[,6]/varparticlesize, msq[,7]) # multiply the first column by vartimestep to give time in seconds, divide the 6th column to give msd in dimeters
   msq <- rbind(c("Frames", "Time", "Mean dx", "Mean dy", "Mean dx^2", "Mean dy^2", "Mean dr^2 (Pixels)", "Mean dr^2 (Diameters)", "Particle Count"), msq)
   write(t(msq),file=paste(vardirname, "msd.txt", sep=""),ncolumns=9,sep="\t")
   
   #Do isf and write it out
-  fsqt <- isf(tr,length=19)
+  if(remove_drift == TRUE) 
+    {fsqt <- isf(trnodrift,length=19)}
+  else
+    {fsqt <- isf(tr,length=19)}
   fsqt <- cbind(fsqt[,1], fsqt[,1]*vartimestep, fsqt[,2:5]) # multiply the first column by vartimestep to give time in seconds
   fsqt <- rbind(c("Frames", "Time", "Real", "Imaginary", "Modulus", "Samples"), fsqt)
   write(t(fsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=6, sep="\t")

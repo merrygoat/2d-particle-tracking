@@ -30,31 +30,32 @@ driftremoval = function(trackarray, display_graphs=FALSE){
   
   }
   
-  ################# Normalise displacement ######################################
+  ######## Normalise displacement and Calculate cumulative displacement ############
   
   totaldisplacement[,1:2] = totaldisplacement[,1:2] / totaldisplacement[,3]
-
-  ################ Calculate cumulative displacement and plot it #################
+  totaldisplacement[1,4:5] = totaldisplacement[1,1:2]
+  for(i in 2:length(totaldisplacement[,1])){
+    totaldisplacement[i,4:5] = totaldisplacement[i,1:2] + totaldisplacement[i-1,4:5]
+  }
   
+  ################  and plot it #################
+
   if(display_graphs==TRUE){
-    totaldisplacement[1,4:5] = totaldisplacement[1,1:2]
-    for(i in 2:(length(totaldisplacement[,1])-1)){
-      totaldisplacement[i,4:5] = totaldisplacement[i,1:2] + totaldisplacement[i-1,4:5]
-    }
     if(.Platform$OS.type == "unix") {x11()} else{windows()}
-    plot(seq(from = 1, to = framenumber), totaldisplacement[1:length(totaldisplacement[,4])-1,4])
-    lines(seq(from = 1, to = framenumber), totaldisplacement[1:length(totaldisplacement[,4])-1,4])
+    plot(seq(from = 1, to = numframes), totaldisplacement[1:length(totaldisplacement[,4]),4], ylab = "cumulative x displacement")
+    lines(seq(from = 1, to = numframes), totaldisplacement[1:length(totaldisplacement[,4]),4])
     if(.Platform$OS.type == "unix") {x11()} else{windows()}
-    plot(seq(from = 1, to = framenumber), totaldisplacement[1:length(totaldisplacement[,4])-1,5])
-    lines(seq(from = 1, to = framenumber), totaldisplacement[1:length(totaldisplacement[,4])-1,5])
+    plot(seq(from = 1, to = numframes), totaldisplacement[1:length(totaldisplacement[,4]),5], ylab = "cumulative y displacement")
+    lines(seq(from = 1, to = numframes), totaldisplacement[1:length(totaldisplacement[,4]),5])
   }
   
   ################ Remove drift from tracks and return array ######################
   
-  for(i in 2:numframes){
+  for(i in 1:numframes){
     framemask = which(trackarray[,6] == i)
-    browser()
-    trackarray[framemask, 1:2] == trackarray[framemask, 1:2] - totaldisplacement[i-1,1:2]
+    for(j in 1:length(framemask)){
+      trackarray[framemask[j], 1:2] = trackarray[framemask[j], 1:2] + totaldisplacement[i,4:5]
+    }
   }
   
   return(trackarray)
