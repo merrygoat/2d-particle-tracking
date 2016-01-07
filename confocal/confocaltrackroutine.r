@@ -5,20 +5,18 @@
 confocaltrackroutine = function(remove_drift = TRUE){
   
   # source all scripts in the current directory
-  #setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
-  setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking")
-  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
+  setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
+  filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
   #File directory variables
-  #varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-11-12/vi/images/vi"
-  varfilename <- "C:\\Users\\Peter\\Dropbox\\Confocal\\Paddy 2009\\v"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/stack/FITC 19"
   #put slash on end of dirname
-  vardirname <- "C:\\Users\\Peter\\Dropbox\\Confocal\\"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/stack/"
   
   #Pretrack variables
-  varimages <- 128        #How many image to read from varfilename
+  varimages <- 30        #How many image to read from varfilename
   vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 11         #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
@@ -30,9 +28,9 @@ confocaltrackroutine = function(remove_drift = TRUE){
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 10    #Used as the wavevector for isf
-  vartimestep = 1         #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 10      #How many frames of data to analyse for the g(r)
+  varparticlesize = 19    #Used as the wavevector for isf
+  vartimestep = 60    #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vargofrframes = 20      #How many frames of data to analyse for the g(r)
   
   
   ### Main ###
@@ -48,13 +46,13 @@ confocaltrackroutine = function(remove_drift = TRUE){
   #Print out some sample overcircled images so the user can check the tracking is OK.  
   for(i in 0:9) {
     imagecn <- paste(varfilename,formatC(round(i/10*varimages),flag="0",digits=3),".png",sep="") 
-    #imagecn <- channel(readImage(imagecn), "gray")
+    imagecn <- channel(readImage(imagecn), "gray")
     
-    r <- channel(readImage(imagecn), "r")
-    g <- channel(readImage(imagecn), "g")
-    b <- channel(readImage(imagecn), "b")
+    #r <- channel(readImage(imagecn), "r")
+    #g <- channel(readImage(imagecn), "g")
+    #b <- channel(readImage(imagecn), "b")
     
-    imagecn <- 0.21*r+0.71*g+0.07*b
+    #imagecn <- 0.21*r+0.71*g+0.07*b
     
     temp <- pt[ptfilt,]
     ptmask <- which(temp[,6] == round(i/10*varimages))

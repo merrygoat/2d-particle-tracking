@@ -33,7 +33,7 @@
 #
 # Note: Eccentricity is not computed because of laziness and the fact that I rarely use it for anything
 
-pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diameter,separation=0,masscut,minimum,chan="grey"){
+pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diameter,separation=0,masscut,minimum,chan="grey",zstack=FALSE,znumber=1){
   
   # In contrast with old IDL code, I will read in and handle each image separately in order
   # rather than reading in whole sequence prior to processing
@@ -64,7 +64,12 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
 
     # Build the filepath and name for this image
     #cat("Reading image ",i,"\n")
-    thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".png",sep="")
+    if (zstack==TRUE) {
+      thisimagename <- paste(filename,"_t",formatC(i+1,flag="0",digits=3),"_z",formatC(znumber,flag="0",digits=3),".png",sep="")
+    }
+    else {
+      thisimagename <- paste(filename,formatC(i,flag="0",digits=3),".png",sep="")
+    }
     #cat(thisimagename,"\n")
     thisimage <- channel(readImage(thisimagename), chan)
     
