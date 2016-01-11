@@ -87,8 +87,18 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
     #fsqt <- rbind(c("Frames", "Time", "Real", "Imaginary", "Modulus", "Samples"), fsqt)
   }
   
+  # Post processing of data files
+  allsamples <- cbind(allsamples, rowSums(allsamples[,2:varzdepth]))
+  weightedfsqt <- allfsqt
+  
+  for(i in 3:varzdepth+3){
+    weightedfsqt[,i] <- weightedfsqt[,i]*(allsamples[,i]/allsamples[,i+2])
+  }
+  weightedfsqt <- cbind(weightedfsqt, rowSums(weightedfsqt[,3:varzdepth]))
+  
   write(t(allparticlecount), file=paste(vardirname, "particlecount.txt", sep=""), ncolumns=1+varzdepth, sep="\t")
   write(t(allfsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=2+varzdepth, sep="\t")
+  write(t(weightedfsqt), file=paste(vardirname, "weightedisf.txt", sep=""), ncolumns=varzdepth + 3, sep="\t")
   write(t(allmsq),file=paste(vardirname, "msd.txt", sep=""),ncolumns=2+varzdepth,sep="\t")
   write(t(allsamples),file=paste(vardirname, "samples.txt", sep=""),ncolumns=varzdepth+1,sep="\t")
 
