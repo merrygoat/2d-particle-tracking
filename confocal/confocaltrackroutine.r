@@ -11,26 +11,26 @@ confocaltrackroutine = function(remove_drift = TRUE){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/stack/FITC 19"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/James2D/images/dynhet_"
   #put slash on end of dirname
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/stack/"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/James2D"
   
   #Pretrack variables
-  varimages <- 30        #How many image to read from varfilename
-  vardiameter <- 11       #Particle diameter - used in particle identification
-  varfilter <- 11         #Parameter for lowpass filter
-  varbgavg <- 11          #Parameter for lowpass filter
-  varmasscut <- 1         #Lowest integrated brightness for particle
-  varminimum <- 0.1       #Lowest pixel value for center of particle
+  varimages <- 128        #How many image to read from varfilename
+  vardiameter <- 9       #Particle diameter - used in particle identification
+  varfilter <- 9         #Parameter for lowpass filter
+  varbgavg <- 9          #Parameter for lowpass filter
+  varmasscut <- 0.1         #Lowest integrated brightness for particle
+  varminimum <- 0.01       #Lowest pixel value for center of particle
   
   #Track variables
   varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 19    #Used as the wavevector for isf
-  vartimestep = 60    #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 20      #How many frames of data to analyse for the g(r)
+  varparticlesize = 7    #Used as the wavevector for isf
+  vartimestep = 0.1355    #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vargofrframes = 2      #How many frames of data to analyse for the g(r)
   
   
   ### Main ###
@@ -70,7 +70,7 @@ confocaltrackroutine = function(remove_drift = TRUE){
   
   tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
   if(remove_drift == TRUE) 
-    {trnodrift <- driftremoval(tr, display_graphs = TRUE)}
+    {trnodrift <- driftremoval(tr, display_graphs = FALSE)}
   
   write(t(tr),file=paste(vardirname, "raw_coords.txt", sep=""),ncolumns=7,sep="\t")
   #Don't need to filter tr as it was already filtered from pt

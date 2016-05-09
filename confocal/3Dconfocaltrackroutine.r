@@ -52,7 +52,7 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   allfsqt <- seq(from=1, to=varimages-1)
   allfsqt <- cbind(matrix(allfsqt), allfsqt*vartimestep)
     
-  for(i in 1:varzdepth){
+  for(i in vardisplacement:(varzdepth+vardisplacement)){
     cat("Frame", i, " of ", varzdepth, "\n")
     pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey",zstack=TRUE,znumber=i)
     ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
@@ -81,9 +81,9 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
     
     #Do isf and write it out
     if(remove_drift == TRUE) 
-      {fsqt <- isf(trnodrift,length=19)}
+      {fsqt <- isf(trnodrift,length=varparticlesize)}
     else
-      {fsqt <- isf(tr,length=19)}
+      {fsqt <- isf(tr,length=varparticlesize)}
     allfsqt <- cbind(allfsqt, fsqt[,4]) # multiply the first column by vartimestep to give time in seconds
     #fsqt <- rbind(c("Frames", "Time", "Real", "Imaginary", "Modulus", "Samples"), fsqt)
   }
@@ -91,16 +91,19 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   # Post processing of data files
   allsamples <- cbind(allsamples, rowSums(allsamples[,3:(varzdepth+2)]))
   weightedfsqt <- allfsqt
+  weightedmsq <- allmsq
   
   for(i in 3:(varzdepth+2)){
     weightedfsqt[,i] <- weightedfsqt[,i]*(allsamples[,i]/allsamples[,(varzdepth+3)])
+    weightedmsq[,i] <- weightedmsq[,i]*(allsamples[,i]/allsamples[,(varzdepth+3)])
   }
   weightedfsqt <- cbind(weightedfsqt, rowSums(weightedfsqt[,3:(varzdepth+2)]))
+  weightedmsq <- cbind(weightedmsq, rowSums(weightedmsq[,3:(varzdepth+2)]))
   
   write(t(allparticlecount), file=paste(vardirname, "particlecount.txt", sep=""), ncolumns=1+varzdepth, sep="\t")
-  write(t(allfsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=2+varzdepth, sep="\t")
+#  write(t(allfsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=2+varzdepth, sep="\t")
   write(t(weightedfsqt[,c(1,2,(varzdepth+3))]), file=paste(vardirname, "weightedisf.txt", sep=""), ncolumns=3, sep="\t")
-  write(t(allmsq),file=paste(vardirname, "msd.txt", sep=""),ncolumns=varzdepth+2,sep="\t")
-  write(t(allsamples),file=paste(vardirname, "samples.txt", sep=""),ncolumns=varzdepth+1,sep="\t")
+  write(t(weightedmsq[,c(1,2,(varzdepth+3))]), file=paste(vardirname, "weightedmsd.txt", sep=""),ncolumns=3,sep="\t")
+  write(t(allsamples),file=paste(vardirname, "samples.txt", sep=""),ncolumns=varzdepth+3,sep="\t")
 
 }
