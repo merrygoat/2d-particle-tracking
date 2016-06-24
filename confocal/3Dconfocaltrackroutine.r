@@ -5,22 +5,22 @@
 threeDconfocaltrackroutine = function(remove_drift = TRUE){
   
   # source all scripts in the current directory
-  #setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
-  setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking")
+  setwd("/Users/pc9836/Documents/git/2d-particle-tracking")
+  #setwd("C:\\Users\\Peter\\Documents\\Uni\\PhD\\2d-particle-tracking")
   filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
   #File directory variables
-  #varfilename <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/images/FITC 19"
-  varfilename <- "E:\\Confocal\\STED\\15-12-21\\processed images\\FITC 19"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Hard\ spheres/15-12-21/processed\ images/FITC\ 19"
+  #varfilename <- "E:\\Confocal\\STED\\15-12-21\\processed images\\FITC 19"
   #put slash on end of dirname
-  #vardirname <- "/Volumes/WIN_DATA/Confocal/STED/15-12-21/"
-  vardirname <- "E:\\Confocal\\STED\\15-12-21\\"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Hard\ spheres/15-12-21/"
+  #vardirname <- "E:\\Confocal\\STED\\15-12-21\\"
   
   #Pretrack variables
-  varimages <- 30         #How many image to read from varfilename
-  varzdepth <- 2 #18         #How many z planes there are
+  varimages <- 2         #How many image to read from varfilename
+  varzdepth <- 7         #How many z planes there are
   vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 11         #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
@@ -30,12 +30,24 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   #Track variables
   varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
+  goodenough <- 10        #Minimum acceptable trajectory length
   
   #Other variables that I can't think of a title for
-  varparticlesize = 19    #Used as the wavevector for isf
+  varparticlesize = 18    #Used as the wavevector for isf
   vartimestep = 60        #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 64      #How many frames of data to analyse for the g(r)
+  vargofrframes = 10      #How many frames of data to analyse for the g(r)
   
+  ### Variable check ###
+  
+  if(varimages < 2) {
+    cat("Error, varimages too small. At least two timesteps must be analysed.\n")
+    quit()
+  }
+
+  if(goodenough > varimages) {
+    cat("Good enough is too small. Setting to varimages.\n")
+    goodenough <- varimages
+  }
   
   ### Main ###
   
@@ -51,25 +63,27 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   allsamples <- cbind(matrix(allsamples), allsamples*vartimestep)
   allfsqt <- seq(from=1, to=varimages-1)
   allfsqt <- cbind(matrix(allfsqt), allfsqt*vartimestep)
-    
-  for(i in vardisplacement:(varzdepth+vardisplacement)){
+  
+  # Allows slicing of the z-stack
+  vardisplacement <- 1
+  
+  for(i in vardisplacement:(varzdepth+vardisplacement-1)){
     cat("Frame", i, " of ", varzdepth, "\n")
     pt <- pretrack(filename=varfilename,images=varimages,diameter=vardiameter,filter=varfilter,bgavg=varbgavg, masscut=varmasscut,minimum=varminimum,chan="grey",zstack=TRUE,znumber=i)
     ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
-  
     
     #Get particle count for each image
     particlecount <- rep(0, varimages-1)
-    for(i in 0:varimages-1) {particlecount[i] <- sum(pt[ptfilt,6] == i)}
+    for(j in 0:varimages-1) {particlecount[j] <- sum(pt[ptfilt,6] == j)}
     allparticlecount <- cbind(allparticlecount, matrix(particlecount))
     
-    tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
+    tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=1)
     if(remove_drift == TRUE) {
       # write to new array - would paste over "tr" but had trouble with "tr" not taking new values
       trnodrift <- driftremoval(tr)
     }
   
-    #write(t(tr),file=paste(vardirname, "raw_coords.txt", sep=""),ncolumns=7,sep="\t")
+    write(t(tr),file=paste(vardirname, "slice_", i, "_raw_coords.txt", sep=""),ncolumns=7,sep="\t")
     #Don't need to filter tr as it was already filtered from pt
     #Do msd and write it out
     if(remove_drift == TRUE) 
@@ -89,6 +103,7 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   }
   
   # Post processing of data files
+  browser()
   allsamples <- cbind(allsamples, rowSums(allsamples[,3:(varzdepth+2)]))
   weightedfsqt <- allfsqt
   weightedmsq <- allmsq
@@ -101,7 +116,6 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   weightedmsq <- cbind(weightedmsq, rowSums(weightedmsq[,3:(varzdepth+2)]))
   
   write(t(allparticlecount), file=paste(vardirname, "particlecount.txt", sep=""), ncolumns=1+varzdepth, sep="\t")
-#  write(t(allfsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=2+varzdepth, sep="\t")
   write(t(weightedfsqt[,c(1,2,(varzdepth+3))]), file=paste(vardirname, "weightedisf.txt", sep=""), ncolumns=3, sep="\t")
   write(t(weightedmsq[,c(1,2,(varzdepth+3))]), file=paste(vardirname, "weightedmsd.txt", sep=""),ncolumns=3,sep="\t")
   write(t(allsamples),file=paste(vardirname, "samples.txt", sep=""),ncolumns=varzdepth+3,sep="\t")

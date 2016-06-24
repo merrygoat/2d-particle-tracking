@@ -2,18 +2,18 @@
 
 # Particle identification tracking and characterisation for 2D confocal images
 
-confocaltrackroutine = function(remove_drift = TRUE){
+singleimagetrack = function(){
   
   # source all scripts in the current directory
-  setwd("/Users/mm8769/Documents/Analysis/RParticletracking")
+  setwd("/Users/pc9836/Documents/git/2d-particle-tracking/")
   filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Users/mm8769/Documents/Images/Microfluidics/2016_04_12/open_init_8_2.tif"
+  varfilename <- "/Users/pc9836/Desktop/a.tiff"
   #put slash on end of dirname
-  vardirname <- "/Users/mm8769/Documents/Images/Microfluidics/2016_04_12/"
+  vardirname <- "/Users/pc9836/Desktop/"
   
   ### Main ###
   
@@ -22,12 +22,12 @@ confocaltrackroutine = function(remove_drift = TRUE){
   varimgx <- dim(img)[1]          #Width of the image in pixels
   varimgy <- dim(img)[2]          #Height of the image in pixels
   
-  lpbf <- lowpass(img,lobject=19,bgavg=19)
+  lpbf <- lowpass(img,lobject=13,bgavg=13)
   #display(lpbf)
 
-  fbf <- feature(lpbf,diameter=20,masscut=3,minimum=0.3,verbose = TRUE)
+  fbf <- feature(lpbf,diameter=13,masscut=3,minimum=0.3,verbose = TRUE)
   
-  display(overcirc(lpbf,fbf,rad=10))
+  display(overcirc(lpbf,fbf,rad=7))
   #browser()
   tmp <- matrix(data = 0, ncol = 1, nrow = dim(fbf)[1])
   

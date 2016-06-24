@@ -12,7 +12,6 @@
 
 iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
   
-  
   nnewsum <- 0
   
   # We assume time starts at zero and increases to tmax

@@ -56,7 +56,7 @@ pretrack = function(filename,images,crop=c(0,0,0,0),rotang=0,filter,bgavg=5,diam
     
   cat("Progress of particle identification\n")
 
-  objprogress <- txtProgressBar(min=0, max=images-1, style=3)
+  objprogress <- txtProgressBar(min=0, max=images, style=3)
     
   for (i in 0:(images-1)){
     setTxtProgressBar(objprogress, i)  

@@ -11,25 +11,25 @@ confocaltrackroutine = function(remove_drift = TRUE){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/James2D/images/dynhet_"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-06-03/vi/images/vi_"
   #put slash on end of dirname
-  vardirname <- "/Volumes/WIN_DATA/Confocal/James2D"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-06-03/vi/"
   
   #Pretrack variables
-  varimages <- 128        #How many image to read from varfilename
-  vardiameter <- 9       #Particle diameter - used in particle identification
+  varimages <- 1024        #How many image to read from varfilename
+  vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 9         #Parameter for lowpass filter
   varbgavg <- 9          #Parameter for lowpass filter
-  varmasscut <- 0.1         #Lowest integrated brightness for particle
-  varminimum <- 0.01       #Lowest pixel value for center of particle
+  varmasscut <- 1         #Lowest integrated brightness for particle
+  varminimum <- 0.05       #Lowest pixel value for center of particle
   
   #Track variables
   varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 7    #Used as the wavevector for isf
-  vartimestep = 0.1355    #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  varparticlesize = 11    #Used as the wavevector for isf
+  vartimestep = 0.455     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
   vargofrframes = 2      #How many frames of data to analyse for the g(r)
   
   
@@ -44,8 +44,10 @@ confocaltrackroutine = function(remove_drift = TRUE){
   ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
   
   #Print out some sample overcircled images so the user can check the tracking is OK.  
-  for(i in 0:9) {
-    imagecn <- paste(varfilename,formatC(round(i/10*varimages),flag="0",digits=3),".png",sep="") 
+  nsamples = 3
+  for(i in 0:nsamples) {
+    framenumber <- as.integer(floor(i/nsamples*(varimages-1)))
+    imagecn <- paste(varfilename,formatC(framenumber,flag="0",digits=3),".png",sep="") 
     imagecn <- channel(readImage(imagecn), "gray")
     
     #r <- channel(readImage(imagecn), "r")
@@ -55,9 +57,9 @@ confocaltrackroutine = function(remove_drift = TRUE){
     #imagecn <- 0.21*r+0.71*g+0.07*b
     
     temp <- pt[ptfilt,]
-    ptmask <- which(temp[,6] == round(i/10*varimages))
-    circledimage <- overcirc(imagecn, temp[ptmask,], rad=5) 
-    writeImage(circledimage, paste(vardirname, "overcirc", formatC(round(i/10*varimages),flag="0",digits=3), ".tif",sep=""))
+    ptmask <- which(temp[,6] == framenumber)
+    circledimage <- overcirc(imagecn, temp[ptmask,], rad=(varparticlesize/2)) 
+    writeImage(circledimage, paste(vardirname, "overcirc", formatC(framenumber,flag="0",digits=3), ".png",sep=""))
   }
   
   
@@ -68,7 +70,7 @@ confocaltrackroutine = function(remove_drift = TRUE){
   particlecount <- rbind(c("Frames", "Time", "Particle Count"), particlecount)
   write(t(particlecount),file=paste(vardirname, "particlecount.txt", sep=""),ncolumns=3,sep="\t")
   
-  tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=10)
+  tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=3)
   if(remove_drift == TRUE) 
     {trnodrift <- driftremoval(tr, display_graphs = FALSE)}
   
