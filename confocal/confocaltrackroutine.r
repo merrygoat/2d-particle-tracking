@@ -87,9 +87,9 @@ confocaltrackroutine = function(remove_drift = TRUE){
   
   #Do isf and write it out
   if(remove_drift == TRUE) 
-    {fsqt <- isf(trnodrift,length=19)}
+    {fsqt <- isf(trnodrift,length=varparticlesize)}
   else
-    {fsqt <- isf(tr,length=19)}
+    {fsqt <- isf(tr,length=varparticlesize)}
   fsqt <- cbind(fsqt[,1], fsqt[,1]*vartimestep, fsqt[,2:5]) # multiply the first column by vartimestep to give time in seconds
   fsqt <- rbind(c("Frames", "Time", "Real", "Imaginary", "Modulus", "Samples"), fsqt)
   write(t(fsqt), file=paste(vardirname, "isf.txt", sep=""), ncolumns=6, sep="\t")
