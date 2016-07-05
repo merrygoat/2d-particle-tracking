@@ -19,7 +19,7 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   #vardirname <- "E:\\Confocal\\STED\\15-12-21\\"
   
   #Pretrack variables
-  varimages <- 2         #How many image to read from varfilename
+  varimages <- 3         #How many image to read from varfilename
   varzdepth <- 7         #How many z planes there are
   vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 11         #Parameter for lowpass filter
@@ -56,7 +56,7 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   varimgx <- dim(testimg)[1]          #Width of the image in pixels
   varimgy <- dim(testimg)[2]          #Height of the image in pixels
   
-  allparticlecount <- matrix(seq(from=1, to=varimages-1))
+  allparticlecount <- matrix(seq(from=0, to=varimages-1))
   allmsq  <- seq(from=1, to=varimages-1)
   allmsq <- cbind(matrix(allmsq), allmsq*vartimestep)
   allsamples <- seq(from=1, to=varimages-1)
@@ -73,8 +73,8 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
     ptfilt <- which(pt[,1] > varedgecutoff & pt[,1] < (varimgx-varedgecutoff) & pt[,2] > varedgecutoff & pt[,2] < (varimgy-varedgecutoff))
     
     #Get particle count for each image
-    particlecount <- rep(0, varimages-1)
-    for(j in 0:varimages-1) {particlecount[j] <- sum(pt[ptfilt,6] == j)}
+    particlecount <- rep(0, varimages)
+    for(j in 1:varimages) {particlecount[j] <- sum(pt[ptfilt,6] == (j-1))}
     allparticlecount <- cbind(allparticlecount, matrix(particlecount))
     
     tr <- iantrack(pretrack=pt[ptfilt,],maxdisp=varmaxdisp,imgsize=c(varimgx,varimgy),goodenough=1)
@@ -103,8 +103,7 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   }
   
   # Post processing of data files
-  browser()
-  allsamples <- cbind(allsamples, rowSums(allsamples[,3:(varzdepth+2)]))
+  allsamples <- cbind(allsamples, rowSums(allsamples[,3:(varzdepth+2), drop=FALSE]))
   weightedfsqt <- allfsqt
   weightedmsq <- allmsq
   
@@ -112,8 +111,8 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
     weightedfsqt[,i] <- weightedfsqt[,i]*(allsamples[,i]/allsamples[,(varzdepth+3)])
     weightedmsq[,i] <- weightedmsq[,i]*(allsamples[,i]/allsamples[,(varzdepth+3)])
   }
-  weightedfsqt <- cbind(weightedfsqt, rowSums(weightedfsqt[,3:(varzdepth+2)]))
-  weightedmsq <- cbind(weightedmsq, rowSums(weightedmsq[,3:(varzdepth+2)]))
+  weightedfsqt <- cbind(weightedfsqt, rowSums(weightedfsqt[,3:(varzdepth+2), drop=FALSE]))
+  weightedmsq <- cbind(weightedmsq, rowSums(weightedmsq[,3:(varzdepth+2), drop=FALSE]))
   
   write(t(allparticlecount), file=paste(vardirname, "particlecount.txt", sep=""), ncolumns=1+varzdepth, sep="\t")
   write(t(weightedfsqt[,c(1,2,(varzdepth+3))]), file=paste(vardirname, "weightedisf.txt", sep=""), ncolumns=3, sep="\t")
