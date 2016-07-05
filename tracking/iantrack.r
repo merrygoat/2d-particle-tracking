@@ -13,15 +13,11 @@
 iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
   
   nnewsum <- 0
+  # Force standard column names to stop cbind getting angry
+  pretrack <- setNames(pretrack, c("V1",  "V2", "V3", "V4", "V5", "V6"))
   
   # We assume time starts at zero and increases to tmax
   tmax <- max(pretrack[,6])
-  
-  # Make output array of 6 columns to store:
-  # x, y, mass, r^2, frame, particle number
-  # 1 row for now, but we will ignore the first row at the end
-  output <- matrix(nrow=1,ncol=7)
-  #cat(output) #currently says NA NA NA NA NA NA
   
   # Label particles in first frame sequentially from 0
   # These form our initial particle identifications
@@ -30,11 +26,9 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
   zeroparticles <- nrow(zeropt)
   initident <- matrix(nrow=zeroparticles,ncol=1)
   initident[,1] <- seq(from=1,to=zeroparticles,by=1)
-  output <- rbind(output,cbind(zeropt,initident))
+  output <- cbind(zeropt,initident)
+  output <- setNames(output, c("V1",  "V2", "V3", "V4", "V5", "V6", "V7"))
   # So now particles in frame zero have an ID number 
-  
-  # Remove first row of output that contains a bunch of NA
-  output <- output[2:(zeroparticles+1),]
   
   # The ID for the next new particle is...
   nextnewparticle <- zeroparticles + 1
@@ -298,6 +292,7 @@ iantrack = function(pretrack,maxdisp,imgsize,goodenough=0,memory=FALSE){
     
     # Bind identifications to co-ords and then put this on the bottom of output
     nowout <- cbind(nowcoords,nowident)
+    nowout <- setNames(nowout, c("V1",  "V2", "V3", "V4", "V5", "V6", "V7"))
     output <- rbind(output,nowout)
       
   }
