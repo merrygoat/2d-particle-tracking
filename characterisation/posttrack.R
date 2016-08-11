@@ -51,6 +51,20 @@ posttrack = function(remove_drift = FALSE){
   write(t(tr),file=paste(vardirname, "tracked_coords.txt", sep=""),ncolumns=7,sep="\t")
   #Don't need to filter tr as it was already filtered from pt
   #Do msd and write it out
+  
+  fulltrajectoriesdata = matrix(data = 0, nrow = 1, ncol = 7)
+  
+  # Get indicies of particles in first frame
+  browser()
+  initialparticles = tr[which(tr[, 6] == 0), 7]
+  finalparticles = tr[which(tr[, 6] == varimages), 7]
+  fulltrajectories = intersect(initialparticles, finalparticles)
+  for(i in 1:length(fulltrajectories))
+    fulltrajectoriesdata = rbind(fulltrajectoriesdata, tr[which(tr[, 7] == fulltrajectories[i]),])
+  
+  #remove blank first row
+  fulltrajectoriesdata = fulltrajectoriesdata[-1,]
+    
   if(remove_drift == TRUE) 
   {msq <- msd(trnodrift)}
   else
