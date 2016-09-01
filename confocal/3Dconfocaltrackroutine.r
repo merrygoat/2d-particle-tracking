@@ -12,30 +12,30 @@ threeDconfocaltrackroutine = function(remove_drift = TRUE){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Hard\ spheres/15-12-21/processed\ images/FITC\ 19"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-08-25/v/images/v_"
   #varfilename <- "E:\\Confocal\\STED\\15-12-21\\processed images\\FITC 19"
   #put slash on end of dirname
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Hard\ spheres/15-12-21/"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-08-25/v/"
   #vardirname <- "E:\\Confocal\\STED\\15-12-21\\"
   
   #Pretrack variables
-  varimages <- 3         #How many image to read from varfilename
-  varzdepth <- 7         #How many z planes there are
+  varimages <- 250         #How many image to read from varfilename
+  varzdepth <- 22         #How many z planes there are
   vardiameter <- 11       #Particle diameter - used in particle identification
   varfilter <- 11         #Parameter for lowpass filter
   varbgavg <- 11          #Parameter for lowpass filter
-  varmasscut <- 1         #Lowest integrated brightness for particle
-  varminimum <- 0.1       #Lowest pixel value for center of particle
+  varmasscut <- 0.1         #Lowest integrated brightness for particle
+  varminimum <- 0.01       #Lowest pixel value for center of particle
   
   #Track variables
   varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
-  goodenough <- 10        #Minimum acceptable trajectory length
+  goodenough <- 5        #Minimum acceptable trajectory length
   
   #Other variables that I can't think of a title for
-  varparticlesize = 18    #Used as the wavevector for isf
-  vartimestep = 60        #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 10      #How many frames of data to analyse for the g(r)
+  varparticlesize = 15.5    #Used as the wavevector for isf
+  vartimestep = 1.05        #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vargofrframes = 2      #How many frames of data to analyse for the g(r)
   
   ### Variable check ###
   

@@ -11,26 +11,26 @@ confocaltrackroutine = function(remove_drift = TRUE){
   library(EBImage)
   
   #File directory variables
-  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-06-03/vi/images/vi_"
+  varfilename <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-08-25/iii/images/iii_"
   #put slash on end of dirname
-  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-06-03/vi/"
+  vardirname <- "/Volumes/WIN_DATA/Confocal/STED/Soft\ spheres/16-08-25/iii/"
   
   #Pretrack variables
-  varimages <- 1024        #How many image to read from varfilename
+  varimages <- 246        #How many image to read from varfilename
   vardiameter <- 11       #Particle diameter - used in particle identification
-  varfilter <- 9         #Parameter for lowpass filter
-  varbgavg <- 9          #Parameter for lowpass filter
-  varmasscut <- 1         #Lowest integrated brightness for particle
-  varminimum <- 0.05       #Lowest pixel value for center of particle
+  varfilter <- 11         #Parameter for lowpass filter
+  varbgavg <- 11          #Parameter for lowpass filter
+  varmasscut <- 0.1         #Lowest integrated brightness for particle
+  varminimum <- 0.01       #Lowest pixel value for center of particle
   
   #Track variables
   varedgecutoff <- 10     #Cuts off this many pixels from each edge of the image in all data output - this is because particle identification is bad around the edges.
   varmaxdisp <- 5         #Used in tracking - the maximum allowed interframe displacement
   
   #Other variables that I can't think of a title for
-  varparticlesize = 11    #Used as the wavevector for isf
-  vartimestep = 0.455     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
-  vargofrframes = 2      #How many frames of data to analyse for the g(r)
+  varparticlesize = 15.5    #Used as the wavevector for isf
+  vartimestep = 0.261     #Frame time in seconds. Used for all data output to correct time in frames to time in seconds.
+  vargofrframes = 10      #How many frames of data to analyse for the g(r)
   
   
   ### Main ###
