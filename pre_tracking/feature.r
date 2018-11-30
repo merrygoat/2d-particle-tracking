@@ -54,7 +54,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   cosmask <- cos(2*theta)*circmask
   
   # Dilate finds local maxima
-  dilateimg <- dilateGreyScale(imgborder,circmask)
+  dilateimg <- dilate(imgborder,circmask)
   #dilateimg <- t(dilateimg)
   
   # Check for where dilated image = image and is greater than minimum
