@@ -5,7 +5,7 @@
 # Ian Williams
 # 22/09/2013
 
-feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, verbose=0) {
+feature = function(image, diameter, masscut, minimum, ecccut=1, verbose=0) {
   # Require odd diameter
   if ((diameter %% 2)==0) {
     cat('Requires odd diameter. Adding 1...\n')
@@ -40,15 +40,12 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
   # Check for where dilated image = image and is greater than minimum
   # Returns logical matrix that is TRUE at local maxima i.e. particle centres
   # Recommend minimum = 0.5 to start with
-  r <- ((dilateimg==imgborder)&(imgborder > minimum))
+  r <- ((dilateimg==imgborder) & (imgborder > minimum))
   r <- r*1
   
   # Now to get pixel co-ordinates out of this matrix image of particle centres
   coords <- which(r==1,arr.ind=TRUE)
     
-  xcoords <- coords[,1]
-  ycoords <- coords[,2]
-  
   # Number of particles found
   nparticles <- length(coords[,1])
   if (verbose==1) {
@@ -56,10 +53,10 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
   }
 
   # Low and high x and y for each particle centre
-  xlo <- xcoords-range
-  xhi <- xcoords+range
-  ylo <- ycoords-range
-  yhi <- ycoords+range
+  xlo <- coords[,1] - range
+  xhi <- coords[,1] + range
+  ylo <- coords[,2] - range
+  yhi <- coords[,2] + range
   
   
   # New separation treatment Feb 2014 (prompted by Lizzie's work)
@@ -79,14 +76,14 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
         # If not then this pixel is not our guy
         #cat("Case 1","\n")
         #cat(wmax,"\n")
-        if (((wmax[1,1] - (range+1))^2 + (wmax[1,2] - (range+1))^2) != 0){ cimgborder[xcoords[i],ycoords[i]] <- 0 }
+        if (((wmax[1,1] - (range+1))^2 + (wmax[1,2] - (range+1))^2) != 0){ cimgborder[coords[i, 1], coords[i, 2]] <- 0 }
       } else {
         # Case where there are multiple maxima
         # Are any at the centre?
         # If not then this pixel is not our guy
         #cat("Case 2","\n")
         if (all(((wmax[,1] - (range+1))^2 + (wmax[,2] - (range+1))^2) != 0)){ 
-          cimgborder[xcoords[i],ycoords[i]] <- 0 
+          cimgborder[coords[i, 1], coords[i, 2]] <- 0 
         } else{
           # But if one of them is the centre, how about we take the centre of mass of all the maxmima?
           avgmaxx <- round(mean(wmax[,1])) 
@@ -116,10 +113,10 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
   }
 
   # Low and high x and y for each particle centre
-  xlo <- xcoords-range
-  xhi <- xcoords+range
-  ylo <- ycoords-range
-  yhi <- ycoords+range
+  xlo <- coords[,1] - range
+  xhi <- coords[,1] + range
+  ylo <- coords[,2] - range
+  yhi <- coords[,2] + range
   
   
   # Now we are using our circular mask again
@@ -179,54 +176,7 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
   xcoords <- coords[,1]
   ycoords <- coords[,2]
   
-  #cat(sum(xcentroids[,1])+sum(ycentroids[,1]),"\n")
-  
-  # Iteration of centroiding
-  # Iteration counter
-  # THIS STILL NEEDS SOME WORK
-  itnum <- 0
-  if (iterate==TRUE){
-    repeat{
-      # break if centroids are perfect
-      if(abs(sum(xcentroids[,1])+sum(ycentroids[,1]))<1){break}
-      # also break if we repeat too many times (for now let's say 10)
-      if(itnum >= 20){break}
-      
-      # increment iteration number
-      itnum <- itnum + 1
-      
-      xlo <- xcoords-range
-      xhi <- xcoords+range
-      ylo <- ycoords-range
-      yhi <- ycoords+range
-      
-      for (i in 1:nparticles){
-        # Sums brightness in circular region around each particle centre
-        mass[i] <- sum((imgborder[xlo[i]:xhi[i],ylo[i]:yhi[i]])*circmask)
-      }
-      
-      for (i in 1:nparticles){
-        # Sums brightness in circular region around each particle centre
-        # x and y reverse again because we label rows first in R for some reason
-        xcentroids[i,1] <- sum((imgborder[xlo[i]:xhi[i],ylo[i]:yhi[i]])*xmask)
-        ycentroids[i,1] <- sum((imgborder[xlo[i]:xhi[i],ylo[i]:yhi[i]])*ymask)
-      }
-      
-      xcentroids[,1] <- (xcentroids[,1]/mass[])
-      ycentroids[,1] <- (ycentroids[,1]/mass[])
-      
-      # True centres here
-      coords[,1] <- coords[,1] + xcentroids[,1]
-      coords[,2] <- coords[,2] + ycentroids[,1]
-      xcoords <- coords[,1]
-      ycoords <- coords[,2]   
-      
-      cat(sum(xcentroids[,1])+sum(ycentroids[,1]),"\n")
-      
-    }
-    
-  }
-  
+
   
   # Since we added a border of width diameter to the image, we should subtract this from the co-ords
   
@@ -249,8 +199,6 @@ feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, v
   output[,4] <- rg[,1]
   ecc[,1] <- ecc[,1]/mass[]
   output[,5] <- ecc[,1]
-  
-
   
   
   # Return the output array with data in columns:
