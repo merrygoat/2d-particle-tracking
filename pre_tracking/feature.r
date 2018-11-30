@@ -6,7 +6,7 @@
 # 22/09/2013
 
 feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecccut=1,verbose=0){
-  
+                     
   # Require odd diameter
   if ((diameter %% 2)==0){
     cat('Requires odd diameter. Adding 1...\n')
@@ -54,8 +54,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   cosmask <- cos(2*theta)*circmask
   
   # Dilate finds local maxima
-  # dilateimg <- dilateGreyScale(imgborder,circmask) # dilateGreyScale is now deprecated
-  dilateimg <- dilate(imgborder,circmask)
+  dilateimg <- dilateGreyScale(imgborder,circmask)
   #dilateimg <- t(dilateimg)
   
   # Check for where dilated image = image and is greater than minimum
@@ -324,6 +323,9 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   ecc[,1] <- ecc[,1]/mass[]
   output[,5] <- ecc[,1]
   
+
+  
+  
   # Return the output array with data in columns:
   # x, y, mass, r_g, eccentricity
 
@@ -333,7 +335,13 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   if (verbose==1){
   cat('Particles after eccentricity cut: ',nrow(output),'\n')
   }
-
+  
+  #Area fraction
+  eta <- (pi/4 * diameter^2) * (nparticles/(ny*nx))
+  cat('Area Fraction: ',eta,'\n')
+  
   return(output)
+  
+  
   
 }
