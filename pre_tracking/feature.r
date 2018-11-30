@@ -5,10 +5,9 @@
 # Ian Williams
 # 22/09/2013
 
-feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecccut=1,verbose=0){
-                     
+feature = function(image, diameter, separation=0, masscut, minimum, iterate=FALSE, ecccut=1, verbose=0) {
   # Require odd diameter
-  if ((diameter %% 2)==0){
+  if ((diameter %% 2)==0) {
     cat('Requires odd diameter. Adding 1...\n')
     diameter <- diameter + 1    
   }
@@ -17,11 +16,8 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   nx <- nrow(image)
   ny <- ncol(image)
   
-  #cat(nx,'\n')
-  #cat(ny,'\n')
-  
   # Put a black border around the image 
-  imgborder <- matrix(nrow=(nx + 2*diameter),ncol=(ny + 2*diameter))
+  imgborder <- matrix(nrow=(nx + 2 * diameter), ncol=(ny +2 * diameter))
   imgborder[,] <- 0
   imgborder[(diameter+1):(diameter+nx),(diameter+1):(diameter+ny)] <- image
   
@@ -29,21 +25,11 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   # Width of sampling region is diameter
   range <- (diameter-1)/2
   
-  # Building circular mask
-  x2 <- seq(from=(0 - range),to=range,by=1)^2
-  x2 <- t(x2)
-  xmat <- matrix(nrow=diameter,ncol=diameter)
-  xmat[,] <- x2
-  ymat <- t(xmat)
-  r2 <- xmat + ymat
-  circmask <- r2<=range^2
-  # circmask contains a logical matrix which is true within a circle of radius range
-  # convert logical to numeric
-  circmask <- circmask*1
+  circmask <- get_circular_mask(range, diameter)
   
   # Theta mask
-  x <- seq(from=(0 - range),to=range,by=1)
-  y <- seq(from=(0 - range),to=range,by=1)
+  x <- seq(from=(-range), to=range)
+  y <- seq(from=(-range), to=range)
   theta <- matrix(nrow=diameter,ncol=diameter)
   for(j in 1:diameter){
     theta[j,] <- atan2(y[j],x)
@@ -55,8 +41,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   
   # Dilate finds local maxima
   dilateimg <- dilate(imgborder,circmask)
-  #dilateimg <- t(dilateimg)
-  
+
   # Check for where dilated image = image and is greater than minimum
   # Returns logical matrix that is TRUE at local maxima i.e. particle centres
   # Recommend minimum = 0.5 to start with
@@ -310,7 +295,7 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   output[,3] <- mass[]
   
   # r^2 mask for radius of gyration
-  r2mask <- r2*circmask
+  r2mask <- get_r2_mask(range, diameter)
   # Estimating radius of gyration and eccentricity
   rg <- matrix(ncol=1,nrow=nparticles)
   ecc <- matrix(ncol=1,nrow=nparticles)
@@ -342,6 +327,31 @@ feature = function(image,diameter,separation=0,masscut,minimum,iterate=FALSE,ecc
   
   return(output)
   
+}
+
+get_circular_mask = function(range, diameter) {
+  # Building circular mask
+  x2 <- t(seq.int(from=(-range), to=range)^2)
+  xmat <- matrix(nrow=diameter,ncol=diameter)
+  xmat[,] <- x2
+  ymat <- t(xmat)
+  r2 <- xmat + ymat
+  circmask <- r2 <= range^2
+  # circmask contains a logical matrix which is true within a circle of radius range
+  # convert logical to numeric
+  circmask <- circmask*1
   
+  return(circmask)
+}
+
+get_r2_mask = function(range, diameter) {
+  x2 <- t(seq.int(from=(-range), to=range)^2)
+  xmat <- matrix(nrow=diameter,ncol=diameter)
+  xmat[,] <- x2
+  ymat <- t(xmat)
+  r2 <- xmat + ymat
+  circmask <- r2 <= range^2
   
+  r2mask <- r2*circmask
+  return(r2mask)
 }

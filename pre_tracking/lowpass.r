@@ -21,7 +21,6 @@ lowpass = function(image,lobject,bgavg=5,background="mean"){
   image <- image/max(image)
 
   # Lowpass filter
-  browser()
   lp_filter <- makeBrush(lobject,shape="disc",step=FALSE)^2
   lp_filter <- lp_filter/sum(lp_filter)
   
