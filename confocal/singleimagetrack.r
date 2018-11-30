@@ -24,7 +24,7 @@ singletrackroutine = function(){
   img <- channel(readImage(varfilename), "grey")
   varimgx <- dim(img)[1]          # Width of the image in pixels
   varimgy <- dim(img)[2]          # Height of the image in pixels
-  
+
   # Apply the lowpass filter to blur the image
   lpbf <- lowpass(img,lobject=11,bgavg=11)
 
