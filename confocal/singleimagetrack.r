@@ -11,8 +11,7 @@ singletrackroutine = function(){
   filelist <- c("pre_tracking/feature.r", "characterisation/gr2d.r", "tracking/iantrack.r", "tracking/driftremoval.R", "characterisation/isf.r", "pre_tracking/lowpass.r", "characterisation/msd.r", "pre_tracking/pretrack.r", "characterisation/shift.r", "characterisation/overcirc.r", "characterisation/psi6series.r", "characterisation/psi6loc.r", "characterisation/drawvoronoi.r")
   sapply(filelist,source,.GlobalEnv)
   library(EBImage)
-  library(tripack)
-  
+
   #File directory variables
   varfilename <- "./documentation/brightfield.tif"
   #put slash on end of dirname
