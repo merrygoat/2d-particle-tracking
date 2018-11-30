@@ -5,7 +5,7 @@
 # Ian Williams
 # 22/09/2013
 
-feature = function(image, diameter, separation=0, masscut, minimum, iterate=FALSE, ecccut=1, verbose=0) {
+feature = function(image, diameter, masscut, minimum, iterate=FALSE, ecccut=1, verbose=0) {
   # Require odd diameter
   if ((diameter %% 2)==0) {
     cat('Requires odd diameter. Adding 1...\n')
@@ -28,12 +28,7 @@ feature = function(image, diameter, separation=0, masscut, minimum, iterate=FALS
   circmask <- get_circular_mask(range, diameter)
   
   # Theta mask
-  x <- seq(from=(-range), to=range)
-  y <- seq(from=(-range), to=range)
-  theta <- matrix(nrow=diameter,ncol=diameter)
-  for(j in 1:diameter){
-    theta[j,] <- atan2(y[j],x)
-  }
+  theta <- get_theta_mask(range, diameter)
   
   # Sine and cosine masks
   sinmask <- sin(2*theta)*circmask
@@ -56,8 +51,8 @@ feature = function(image, diameter, separation=0, masscut, minimum, iterate=FALS
   
   # Number of particles found
   nparticles <- length(coords[,1])
-  if (verbose==1){
-  cat('Initial particles: ',nparticles,'\n')
+  if (verbose==1) {
+    cat('Initial particles: ', nparticles, '\n')
   }
 
   # Low and high x and y for each particle centre
@@ -155,59 +150,6 @@ feature = function(image, diameter, separation=0, masscut, minimum, iterate=FALS
   cat('Particles after masscut: ',nparticles,'\n')
   }
 
-  # Separation is very slow for large numbers of particles 
-  # Probably don't use this bit
-  if (separation != 0){
-    # Find separations between identified particles
-    # Put these into nparticles by nparticles matrix
-    partseps <- matrix(ncol=nparticles,nrow=nparticles)
-    for (i in 1:nparticles){
-      for (j in 1:nparticles){
-        # Put distance between particles into partseps
-        partseps[i,j] <- sqrt((coords[i,1]-coords[j,1])^2 + (coords[i,2]-coords[j,2])^2)
-      }
-    }
-  
-    # Make logical array for particles too close to one another
-    # where too close is defined by separation
-    tooclose <- which(partseps < separation,arr.ind=TRUE)
-    # But remove those that correspond to diagonal elements
-    # i.e. particle too close to self
-    ntooclose <- length(tooclose[,1])
-    # make keep logical matrix indicating which particles are kept and which are thrown away
-    keep <- matrix(ncol=1,nrow=nparticles)
-    # Initialise keep to true for all particles, update to false in forthcoming loop if particle is bad
-    keep[,1] <- TRUE
-    # Now loop over tooclose conflicts
-    for (i in 1:ntooclose){
-      if (tooclose[i,1] != tooclose[i,2]){
-        # If two DIFFERENT particles are too close choose the brightest one as the true particle
-        # Put equality in first case to avoid weird bug I found
-        # This is an example of crappy programming - it throws away BOTH particles
-        if (mass[tooclose[i,1]] >= mass[tooclose[i,2]]){keep[tooclose[i,2],1] <- FALSE}
-        if (mass[tooclose[i,1]] < mass[tooclose[i,2]]){keep[tooclose[i,1],1] <- FALSE}
-      }
-    }
-  
-  
-    # Throw away the particles that don't make the cut
-    xcoords <- xcoords[keep]
-    ycoords <- ycoords[keep]
-    mass <- mass[keep]
-    xlo <- xlo[keep]
-    xhi <- xhi[keep]
-    ylo <- ylo[keep]
-    yhi <- yhi[keep]
-    nparticles <- length(xcoords)
-    coords <- matrix(ncol=2,nrow=nparticles)
-    coords[,1] <- xcoords
-    coords[,2] <- ycoords
-  
-    # Number of particles remaining after separation resolution
-    if (verbose==1){
-    cat('Particles after separation resolution: ',nparticles,'\n')
-    }    
-  }
     
   # Centroiding for true centres
   xcentroids <- matrix(ncol=1,nrow=nparticles)
@@ -354,4 +296,15 @@ get_r2_mask = function(range, diameter) {
   
   r2mask <- r2*circmask
   return(r2mask)
+}
+
+get_theta_mask = function (range, diameter) {
+  # Generate theta mask
+  x <- seq(from=(-range), to=range)
+  y <- seq(from=(-range), to=range)
+  theta <- matrix(nrow=diameter,ncol=diameter)
+  for(j in 1:diameter) {
+    theta[j,] <- atan2(y[j],x)
+  }
+  return(theta)
 }
