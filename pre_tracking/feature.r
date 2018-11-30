@@ -41,50 +41,58 @@ feature = function(image, diameter, masscut, minimum, ecccut=1, verbose=0) {
   # Returns logical matrix that is TRUE at local maxima i.e. particle centres
   # Recommend minimum = 0.5 to start with
   r <- ((dilateimg==imgborder) & (imgborder > minimum))
-  r <- r*1
+  #r <- r*1
   
   # Now to get pixel co-ordinates out of this matrix image of particle centres
   coords <- which(r==1,arr.ind=TRUE)
-    
+
   # Number of particles found
   nparticles <- length(coords[,1])
   if (verbose==1) {
     cat('Initial particles: ', nparticles, '\n')
   }
 
+  # A matrix to store data about the particles
+  # x_coord, y_coord, mass, radius of gyration, eccentricity
+  particle_data <- matrix(nrow=nparticles,ncol=5)
+  particle_data[, 1:2] <- coords
+  
   # Low and high x and y for each particle centre
-  xlo <- coords[,1] - range
-  xhi <- coords[,1] + range
-  ylo <- coords[,2] - range
-  yhi <- coords[,2] + range
+  xlo <- particle_data[, 1] - range
+  xhi <- particle_data[, 1] + range
+  ylo <- particle_data[, 2] - range
+  yhi <- particle_data[, 2] + range
   
   
   # New separation treatment Feb 2014 (prompted by Lizzie's work)
-  cimgborder <- imgborder*r
-  for (i in 1:nparticles){
+  cimgborder <- imgborder * r
+  for (i in 1:nparticles) {
     # Look at subregion of image
-    b <- cimgborder[xlo[i]:xhi[i],ylo[i]:yhi[i]]
+    particle_coordinates = particle_data[i, 1:2]
+    image_subregion <- get_image_subregion(particle_coordinates, range, cimgborder)
     # And look in a circular region
-    b <- b*circmask
+    image_subregion <- image_subregion*circmask
     # Where in this region is the maximum?
-    wmax <- which(b==max(b,na.rm=TRUE),arr.ind=TRUE)
+    wmax <- which(image_subregion == max(image_subregion, na.rm=TRUE), arr.ind=TRUE)
     #cat(nrow(wmax),"\n")
     # Case where there is just one maximum pixel
-    if (max(b,na.rm=TRUE) != 0){
+    if (max(image_subregion,na.rm=TRUE) != 0){
       if (nrow(wmax) == 1){
         # Is this maximum at the centre?
         # If not then this pixel is not our guy
         #cat("Case 1","\n")
         #cat(wmax,"\n")
         if (((wmax[1,1] - (range+1))^2 + (wmax[1,2] - (range+1))^2) != 0){ cimgborder[coords[i, 1], coords[i, 2]] <- 0 }
-      } else {
+      } 
+      else {
         # Case where there are multiple maxima
         # Are any at the centre?
         # If not then this pixel is not our guy
         #cat("Case 2","\n")
-        if (all(((wmax[,1] - (range+1))^2 + (wmax[,2] - (range+1))^2) != 0)){ 
+        if (all(((wmax[,1] - (range+1))^2 + (wmax[,2] - (range+1))^2) != 0)) { 
           cimgborder[coords[i, 1], coords[i, 2]] <- 0 
-        } else{
+        } 
+        else{
           # But if one of them is the centre, how about we take the centre of mass of all the maxmima?
           avgmaxx <- round(mean(wmax[,1])) 
           avgmaxy <- round(mean(wmax[,2]))
@@ -256,3 +264,12 @@ get_theta_mask = function (range, diameter) {
   }
   return(theta)
 }
+
+get_image_subregion = function (center_coordinate, range, image) {
+  x_low <- center_coordinate[1] - range
+  x_high <- center_coordinate[1] + range
+  y_low <- center_coordinate[2] - range
+  y_high <- center_coordinate[2] + range
+  image_subregion <- image[x_low:x_high, y_low:y_high]
+  return(image_subregion)
+  }
