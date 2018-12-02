@@ -13,11 +13,11 @@ singletrackroutine = function(){
   library(EBImage)
 
   #File directory variables
-  varfilename <- "./documentation/brightfield.tif"
+  varfilename <- "./documentation/t_00000.tif"
   #put slash on end of dirname
   vardirname <- "./sample/"
   
-  vardiameter <- 9                # Particle size in pixels
+  vardiameter <- 5                # Particle size in pixels
   
   ### Main ###
   
@@ -26,22 +26,22 @@ singletrackroutine = function(){
   varimgy <- dim(img)[2]          # Height of the image in pixels
 
   # Apply the lowpass filter to blur the image
-  lpbf <- lowpass(img,lobject=11,bgavg=11)
+  lpbf <- lowpass(img,lobject=5,bgavg=5)
 
   # Identify particles from the blurred image
-  fbf <- feature(lpbf, diameter=9, masscut=5, minimum=0.1, verbose = TRUE)
+  fbf <- feature(lpbf, diameter=5, masscut=1, minimum=0.1, verbose = TRUE)
   
   
-  display(overcirc(lpbf, fbf, rad=vardiameter/2))
+  #display(overcirc(lpbf, fbf, rad=vardiameter/2))
   
   # Add a blank column to the tracked particle data so it the correct shape for the analysis functions
   fbf <- cbind(fbf, matrix(data = 0, ncol = 1, nrow = dim(fbf)[1])) 
   
   #Do g(r) and write it to a file
-  gr <- gr2d(fbf, nbins=150, deltar=0.5, imgsize=c(0,0,varimgx,varimgy), nframes=1)
-  gr <- cbind(gr[,1], gr[,1]/vardiameter, gr[,2])
-  write.table(gr, file=paste(vardirname, "gr.txt", sep=""), row.names=FALSE,
-              col.names=c("Distance (Pixels)", "Diastance (Diameters)",  "g(r)"))
+  #gr <- gr2d(fbf, nbins=150, deltar=0.5, imgsize=c(0,0,varimgx,varimgy), nframes=1)
+  #gr <- cbind(gr[,1], gr[,1]/vardiameter, gr[,2])
+  #write.table(gr, file=paste(vardirname, "gr.txt", sep=""), row.names=FALSE,
+  #            col.names=c("Distance (Pixels)", "Diastance (Diameters)",  "g(r)"))
   
   #Do psi_6
   psi6 <- psi6loc(fbf[,1],fbf[,2])

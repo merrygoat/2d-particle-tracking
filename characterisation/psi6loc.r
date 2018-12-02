@@ -9,7 +9,7 @@ psi6loc = function(xcoords,ycoords){
   
   # Load tripack
   library(tripack)
-  
+
   # First do the triangulation
   triangles <- tri.mesh(xcoords,ycoords)
   
@@ -23,7 +23,7 @@ psi6loc = function(xcoords,ycoords){
   
   # How many particles?
   nparticle <- length(nbours)
-  
+
   # Loop over particles
   for (i in 1:nparticle){
     # Get the neighbours of particle i
@@ -58,14 +58,14 @@ psi6loc = function(xcoords,ycoords){
       theta <- 0.0
       
       # Checking quadrants
-      if ((neighdisps[j,1]==0)&(neighdisps[j,2]>0)){theta <- pi/2}
-      if ((neighdisps[j,1]==0)&(neighdisps[j,2]<0)){theta <- (3*pi)/2}
-      if ((neighdisps[j,1]>0)&(neighdisps[j,2]==0)){theta <- 0}
-      if ((neighdisps[j,1]<0)&(neighdisps[j,2]==0)){theta <- pi}
-      if ((neighdisps[j,1]>0)&(neighdisps[j,2]>0)){theta <- basetheta}
-      if ((neighdisps[j,1]<0)&(neighdisps[j,2]>0)){theta <- pi - basetheta}
-      if ((neighdisps[j,1]<0)&(neighdisps[j,2]<0)){theta <- basetheta + pi}
-      if ((neighdisps[j,1]>0)&(neighdisps[j,2]<0)){theta <- (2*pi) - basetheta}
+      if ((neighdisps[j,1]==0)      & (neighdisps[j,2]>0))  {theta <- pi/2}
+      else if ((neighdisps[j,1]==0) & (neighdisps[j,2]<0))  {theta <- (3*pi)/2}
+      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]==0)) {theta <- 0}
+      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]==0)) {theta <- pi}
+      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]>0))  {theta <- basetheta}
+      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]>0))  {theta <- pi - basetheta}
+      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]<0))  {theta <- basetheta + pi}
+      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]<0))  {theta <- (2*pi) - basetheta}
       
       neighdisps[j,4] <- theta
       

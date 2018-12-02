@@ -6,7 +6,7 @@
 # Taking into account the finite nature of microscope image
 # Pretty slow right now
 
-gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,nframes=-1){
+gr2d = function(data, nbins, deltar, imgsize, binary=FALSE, nframes=-1){
   
   # We are working with multiple frames - how many?
   # Note first frame is labeled zero, so add 1
@@ -16,15 +16,16 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,nframes=-1){
   
   # Output is 2 column matrix with r and g(r)
   # Or if binary is true we have 4 columns to hold bigbig, smallsmall and bigsmall
-  if (binary==FALSE){
-    output <- matrix(ncol=2,nrow=nbins)
+  if (binary==FALSE) {
+    output <- matrix(ncol=2, nrow=nbins)
     # Populate first column of output
-    output[,1] <- seq(from=deltar,to=(nbins*deltar),by=deltar)
+    output[,1] <- seq(from=deltar, to=(nbins*deltar), by=deltar)
     output[,2] <- 0
-  } else{
-    output <- matrix(ncol=4,nrow=nbins)
+  } 
+  else {
+    output <- matrix(ncol=4, nrow=nbins)
     # Populate first column of output
-    output[,1] <- seq(from=deltar,to=(nbins*deltar),by=deltar)
+    output[,1] <- seq(from=deltar, to=(nbins*deltar), by=deltar)
     output[,2] <- 0
     output[,3] <- 0
     output[,4] <- 0
@@ -32,12 +33,13 @@ gr2d = function(data,nbins,deltar,imgsize,binary=FALSE,nframes=-1){
   
   
   # Need to sort density for binary case
-  if(binary==FALSE){
+  if(binary==FALSE) {
     density <- nrow(data)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
-  } else{
-    w <- which(data[,6]==1)
+  } 
+  else {
+    w <- which(data[,6] == 1)
     densitysmall <- length(w)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
-    w <- which(data[,6]==0)
+    w <- which(data[,6] == 0)
     densitybig <- length(w)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
     
     density <- nrow(data)/(((imgsize[3]-imgsize[1])*(imgsize[4]-imgsize[2]))*nframes)
