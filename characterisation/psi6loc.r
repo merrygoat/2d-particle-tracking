@@ -5,7 +5,7 @@
 # Computes local psi_6 for single frame
 # Relies on tripack
 
-psi6loc = function(xcoords,ycoords){
+psi6loc = function(xcoords, ycoords){
   
   # Load tripack
   library(tripack)
@@ -13,31 +13,23 @@ psi6loc = function(xcoords,ycoords){
   # First do the triangulation
   triangles <- tri.mesh(xcoords,ycoords)
   
-  # Extract neighbours
-  nbours <- neighbours(triangles)
-  # This is a list containing the neighbours for each particle
+  # Extract a list containing the neighbours for each particle
+  neighbours <- neighbours(triangles)
+  num_particles <- length(neighbours)
   
   # Output matrix holds:
   # xcoord, ycoord, psi_6 real, psi_6 imaginary, psi_6 modulus
-  output <- matrix(nrow=1,ncol=5)
-  
-  # How many particles?
-  nparticle <- length(nbours)
+  output <- matrix(nrow=num_particles, ncol=5)
 
   # Loop over particles
-  for (i in 1:nparticle){
+  for (i in 1:num_particles){
     # Get the neighbours of particle i
-    thisnbours <- nbours[i]
-    # Unlist this
-    thisnbours <- unlist(thisnbours)
-    # Now this is a vector with the indices of neighbouring particles
-    
-    # How many neighbours do we have?
-    nnbours <- length(thisnbours)
+    i_neighbours <- unlist(neighbours[i])
+    num_neighbours <- length(i_neighbours)
     
     # Make array to hold the distances between particle i and all its neighbours and the angles
-    neighdisps <- matrix(nrow=nnbours,ncol=4)
-    # Columns here are: xdisp, ydisp, r, theta
+    # Columns are: x_displacement, y_dispisplacemet, r, theta
+    neighbour_displacements <- matrix(nrow=num_neighbours,ncol=4)
     
     # Reset cosine and sine totals
     costotal <- 0
@@ -45,29 +37,29 @@ psi6loc = function(xcoords,ycoords){
     # These will hold real and imaginary parts of psi_6 calculation
     
     # Loop over neighbours
-    for (j in 1:nnbours){
+    for (j in 1:num_neighbours){
       # Get x and y displacement of neighbour j from particle i
-      neighdisps[j,1] <- xcoords[thisnbours[j]] - xcoords[i]
-      neighdisps[j,2] <- ycoords[thisnbours[j]] - ycoords[i]
+      neighbour_displacements[j,1] <- xcoords[i_neighbours[j]] - xcoords[i]
+      neighbour_displacements[j,2] <- ycoords[i_neighbours[j]] - ycoords[i]
       
       # Find scalar distance between particles
-      neighdisps[j,3] <- sqrt(neighdisps[j,1]^2 + neighdisps[j,2]^2)
+      neighbour_displacements[j,3] <- sqrt(neighbour_displacements[j,1]^2 + neighbour_displacements[j,2]^2)
       
       # Finding angle is a little involved
-      basetheta <- atan(abs(neighdisps[j,2]/neighdisps[j,1]))
+      basetheta <- atan(abs(neighbour_displacements[j,2]/neighbour_displacements[j,1]))
       theta <- 0.0
       
       # Checking quadrants
-      if ((neighdisps[j,1]==0)      & (neighdisps[j,2]>0))  {theta <- pi/2}
-      else if ((neighdisps[j,1]==0) & (neighdisps[j,2]<0))  {theta <- (3*pi)/2}
-      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]==0)) {theta <- 0}
-      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]==0)) {theta <- pi}
-      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]>0))  {theta <- basetheta}
-      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]>0))  {theta <- pi - basetheta}
-      else if ((neighdisps[j,1]<0)  & (neighdisps[j,2]<0))  {theta <- basetheta + pi}
-      else if ((neighdisps[j,1]>0)  & (neighdisps[j,2]<0))  {theta <- (2*pi) - basetheta}
+      if ((neighbour_displacements[j,1]==0)      & (neighbour_displacements[j,2]>0))  {theta <- pi/2}
+      else if ((neighbour_displacements[j,1]==0) & (neighbour_displacements[j,2]<0))  {theta <- (3*pi)/2}
+      else if ((neighbour_displacements[j,1]>0)  & (neighbour_displacements[j,2]==0)) {theta <- 0}
+      else if ((neighbour_displacements[j,1]<0)  & (neighbour_displacements[j,2]==0)) {theta <- pi}
+      else if ((neighbour_displacements[j,1]>0)  & (neighbour_displacements[j,2]>0))  {theta <- basetheta}
+      else if ((neighbour_displacements[j,1]<0)  & (neighbour_displacements[j,2]>0))  {theta <- pi - basetheta}
+      else if ((neighbour_displacements[j,1]<0)  & (neighbour_displacements[j,2]<0))  {theta <- basetheta + pi}
+      else if ((neighbour_displacements[j,1]>0)  & (neighbour_displacements[j,2]<0))  {theta <- (2*pi) - basetheta}
       
-      neighdisps[j,4] <- theta
+      neighbour_displacements[j,4] <- theta
       
       # Add to sin and cos totals
       costotal <- costotal + cos(6*theta)
@@ -75,27 +67,15 @@ psi6loc = function(xcoords,ycoords){
       
     }
     
-    # Contribution to output
-    thisoutdata <- matrix(nrow=1,ncol=5)
-    
     # Coords in first two columns
-    thisoutdata[,1] <- xcoords[i]
-    thisoutdata[,2] <- ycoords[i]
-    
-    thisoutdata[,3] <- costotal/nnbours
-    thisoutdata[,4] <- sintotal/nnbours
-    
-    thisoutdata[,5] <- sqrt(thisoutdata[,3]^2 + thisoutdata[,4]^2)
-    
-    output <- rbind(output,thisoutdata)
+    output[i, 1] <- xcoords[i]
+    output[i, 2] <- ycoords[i]
+    output[i, 3] <- costotal/num_neighbours
+    output[i, 4] <- sintotal/num_neighbours
+    output[i, 5] <- sqrt(output[i, 3]^2 + output[i, 4]^2)
     
   }
-  
-  # Remove first row of output as it is NA
-  length <- nrow(output)
-  # Remove first row because it is NA NA NA NA NA
-  output <- output[2:length,]
-  
+
   return(output)
   
 }
