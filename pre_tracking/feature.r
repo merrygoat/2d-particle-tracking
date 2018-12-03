@@ -221,7 +221,7 @@ feature = function(image, diameter, masscut, minimum, ecccut=1, verbose=0) {
   
   #Area fraction
   eta <- (pi/4 * diameter^2) * (nparticles/(ny*nx))
-  cat('Area Fraction: ',eta,'\n')
+  #cat('Area Fraction: ',eta,'\n')
   
   return(output)
   
