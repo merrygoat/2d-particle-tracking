@@ -5,7 +5,7 @@
 # lobject must be odd integer
 # Also subtracts background and rescales brightnesses
 
-lowpass = function(image,lobject,bgavg=5,hpass=0,background="mean",setmax=1){
+lowpass = function(image,lobject,bgavg=5,background="mean"){
   
   # Subtract median i.e. background
   if (background=="mean"){
@@ -15,52 +15,29 @@ lowpass = function(image,lobject,bgavg=5,hpass=0,background="mean",setmax=1){
   }
   
   # Anything negative is set to zero
-  black <- which(image < 0)
-  image[black] <- 0
+  image[image < 0] <- 0
   
   # Now scale to full dynamic range 0 to 1
   image <- image/max(image)
-  
-  image[image>1] <- 1
-  
+
   # Lowpass filter
-  lp <- makeBrush(lobject,shape="disc",step=FALSE)^2
-  lp <- lp/sum(lp)
+  lp_filter <- makeBrush(lobject,shape="disc",step=FALSE)^2
+  lp_filter <- lp_filter/sum(lp_filter)
   
-  #cat(dim(image),"\n")
-  #cat(dim(lp),"\n")
-  
-  l <- filter2(image,lp)
-  
-  #Highpass if desired
-  if (hpass != 0){
-    hp <-  matrix(1, nc=3, nr=3)
-    hp[2,2] = hpass
-    h = filter2(image,hp)
-    
-    g <- l-h
-  
-   } else{
-    
-    g <- l
-    
-  }
+  # Filters the image using the fast 2D FFT convolution product
+  l <- filter2(image, lp_filter)
   
   # Local averaging for background
-  bg <- matrix(1,nc=bgavg,nr=bgavg)
+  bg <- matrix(1, nc=bgavg, nr=bgavg)
   bg[,] <- 1.0/(bgavg^2)
   b <- filter2(image,bg)
   
   g <- l - b
   
-  black <- which(g < 0)
-  g[black] <- 0
-  
-  g <- g/(max(g)*setmax)
-  g[g>1] <- 1
-  
-  
-  
+  # Now image has been filtered, renormalise it
+  g[g < 0] <- 0
+  g <- g/(max(g))
+
   return(g)
   
 }
